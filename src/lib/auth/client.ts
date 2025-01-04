@@ -90,7 +90,9 @@ class AuthClient {
 
   async signOut(): Promise<{ error?: string }> {
     localStorage.removeItem('custom-auth-token');
-
+    localStorage.removeItem('userData');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('accessToken');
     return {};
   }
 }

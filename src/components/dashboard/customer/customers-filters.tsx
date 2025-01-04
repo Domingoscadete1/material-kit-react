@@ -6,8 +6,8 @@ import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/di
 
 export function CustomersFilters(): React.JSX.Element {
   return (
-    <Card sx={{ p: 2 }}>
-      <OutlinedInput
+    <Card sx={{ p: 0}}>
+      {/* <OutlinedInput
         defaultValue=""
         fullWidth
         placeholder="Search customer"
@@ -17,7 +17,7 @@ export function CustomersFilters(): React.JSX.Element {
           </InputAdornment>
         }
         sx={{ maxWidth: '500px' }}
-      />
+      /> */}
     </Card>
   );
 }

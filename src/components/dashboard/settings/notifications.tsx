@@ -35,7 +35,7 @@ export function Notifications(): React.JSX.Element {
                 </FormGroup>
               </Stack>
             </Grid>
-            <Grid md={4} sm={6} xs={12}>
+            {/* <Grid md={4} sm={6} xs={12}>
               <Stack spacing={1}>
                 <Typography variant="h6">Phone</Typography>
                 <FormGroup>
@@ -43,7 +43,7 @@ export function Notifications(): React.JSX.Element {
                   <FormControlLabel control={<Checkbox />} label="Security updates" />
                 </FormGroup>
               </Stack>
-            </Grid>
+            </Grid> */}
           </Grid>
         </CardContent>
         <Divider />

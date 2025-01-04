@@ -28,13 +28,6 @@ const schema = zod.object({
   username: zod.string().min(1, { message: 'Username is required' }), 
   password: zod.string().min(1, { message: 'Password is required' }),
 });
-interface UserData {
-  nome: string;
-  email: string;
-  numero_telefone: string;
-  endereco: string;
-  status: string;
-}
 
 type Values = zod.infer<typeof schema>;
 
@@ -47,8 +40,6 @@ export function SignInForm(): React.JSX.Element {
 
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
   const [isPending, setIsPending] = React.useState<boolean>(false);
-  const [userData, setUserData] = React.useState<UserData | null>(null);
-
 
   const {
     control,
@@ -56,32 +47,16 @@ export function SignInForm(): React.JSX.Element {
     setError,
     formState: { errors },
   } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
-  
-  React.useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const storedUserData = await localStorage.getItem('userData');
-
-        
-      } catch (error) {
-        console.error('Erro ao recuperar dados:', error);
-
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
 
   const onSubmit = React.useCallback(
     async (values: Values): Promise<void> => {
       setIsPending(true);
-  
+
       try {
         const response = await axios.post(
           `${baseUrl}api/token/`,
           {
-            username: values.username, // Enviando 'username' corretamente
+            username: values.username, // Enviando 'username' no lugar de 'email'
             password: values.password,
           },
           {
@@ -90,79 +65,37 @@ export function SignInForm(): React.JSX.Element {
             },
           }
         );
-  
+      
         console.log('Response Status:', response.status);
-  
-        if (response.status !== 200) {
-          console.error('Erro da API:', response.data);
-          setError('root', { type: 'server', message: response.data.detail || 'Erro no login.' });
+      
+        if (response.status!=200) {
+          const errorData = await response.data;
+          console.error('Erro da API:', errorData);
+          setError('root', { type: 'server', message: errorData.detail || 'Erro no login.' });
           return;
         }
-  
-        const data = response.data;
-        console.log('Resposta da API login:', data);
-  
+      
+        const data = await response.data;
+        console.log('Resposta da API:', data);
+      
         const decodedToken = jwtDecode(data.access);
         console.log('Token decodificado:', decodedToken);
-  
+      
         if (decodedToken.is_funcionario_posto) {
-          await fetchUserData(data.access);
           localStorage.setItem('accessToken', data.access);
           localStorage.setItem('refreshToken', data.refresh);
-          localStorage.setItem('custom-auth-token', data.access);
           await checkSession?.();
-          
+          router.push(paths.dashboard.overview);
         } else {
           setError('root', { type: 'server', message: 'Usuário não autorizado.' });
         }
       } catch (error: any) {
         console.error('Erro de conexão:', error.message);
         setError('root', { type: 'server', message: 'Erro de conexão com o servidor.' });
-      } finally {
-        setIsPending(false);
       }
     },
     [checkSession, router, setError]
   );
-  
-  const fetchUserData = async (token: string) => {
-    console.log("Iniciando requisição para buscar dados do usuário...");
-  
-    try {
-      const response = await axios.get(`http://localhost:8000/api/user/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-  
-      // Verifique se a resposta da API é válida e contém os dados esperados
-      if (response.status === 200 && response.data) {
-        console.log("Resposta da requisição:", response);
-        const data = response.data;
-        console.log('Dados do usuário:', data);
-  
-        // Armazena os dados do usuário no estado
-        setUserData(data);
-  
-        // Armazena os dados no localStorage
-        await localStorage.setItem('userData', JSON.stringify(data));
-      } else {
-        console.error('Resposta da API inesperada:', response);
-      }
-  
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Erro na requisição axios:', error.response?.data || error.message);
-      } else {
-        console.error('Erro desconhecido:', error);
-      }
-    }
-  };
-  
-  
-  
-  
-  
 
   return (
     <Stack spacing={4}>

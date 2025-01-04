@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import { GearSix as GearSixIcon } from '@phosphor-icons/react/dist/ssr/GearSix';
 import { SignOut as SignOutIcon } from '@phosphor-icons/react/dist/ssr/SignOut';
 import { User as UserIcon } from '@phosphor-icons/react/dist/ssr/User';
+import Config from '@/components/Config';
 
 import { paths } from '@/paths';
 import { authClient } from '@/lib/auth/client';
@@ -27,6 +28,18 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
   const { checkSession } = useUser();
 
   const router = useRouter();
+  const [userData, setUserData] = React.useState<[]>([]);  // Estado para armazenar lances
+  const baseUrl = Config.getApiUrl();
+  const mediaUrl=Config.getApiUrlMedia();
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('userData');
+    if (token) {
+      const userData = JSON.parse(token);
+      setUserData(userData);
+      
+    }
+  }, []);
 
   const handleSignOut = React.useCallback(async (): Promise<void> => {
     try {
@@ -57,9 +70,9 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
       slotProps={{ paper: { sx: { width: '240px' } } }}
     >
       <Box sx={{ p: '16px 20px ' }}>
-        <Typography variant="subtitle1">Sofia Rivers</Typography>
+        <Typography variant="subtitle1">{userData.nome}</Typography>
         <Typography color="text.secondary" variant="body2">
-          sofia.rivers@devias.io
+          {userData.email}
         </Typography>
       </Box>
       <Divider />

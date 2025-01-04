@@ -58,9 +58,9 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
       open={open}
     >
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
+        {/* <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
           <Logo color="light" height={32} width={122} />
-        </Box>
+        </Box> */}
         <Box
           sx={{
             alignItems: 'center',
@@ -77,10 +77,10 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
               Workspace
             </Typography>
             <Typography color="inherit" variant="subtitle1">
-              Devias
+              Postos
             </Typography>
           </Box>
-          <CaretUpDownIcon />
+          {/* <CaretUpDownIcon /> */}
         </Box>
       </Stack>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
@@ -88,7 +88,7 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
         {renderNavItems({ pathname, items: navItems })}
       </Box>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
-      <Stack spacing={2} sx={{ p: '12px' }}>
+      {/* <Stack spacing={2} sx={{ p: '12px' }}>
         <div>
           <Typography color="var(--mui-palette-neutral-100)" variant="subtitle2">
             Need more features?
@@ -116,7 +116,7 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
         >
           Pro version
         </Button>
-      </Stack>
+      </Stack> */}
     </Drawer>
   );
 }

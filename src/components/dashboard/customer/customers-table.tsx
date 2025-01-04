@@ -1,12 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Checkbox from '@mui/material/Checkbox';
 import Divider from '@mui/material/Divider';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -15,104 +12,231 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
-
-import { useSelection } from '@/hooks/use-selection';
+import axios from 'axios';  // Para consumir a API
+import InputAdornment from '@mui/material/InputAdornment';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
+import Config from '@/components/Config';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Snackbar, Alert } from '@mui/material';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 function noop(): void {
   // do nothing
 }
 
-export interface Customer {
+interface Lance {
   id: string;
-  avatar: string;
-  name: string;
-  email: string;
-  address: { city: string; state: string; country: string; street: string };
-  phone: string;
-  createdAt: Date;
+  status: string;
+  preco: number;
+  usuario: string;
+  produto: string;
+  posto: string;
+  descricao: string;
+  date: string;  // Data do lance
 }
 
-interface CustomersTableProps {
+interface LancesTableProps {
   count?: number;
   page?: number;
-  rows?: Customer[];
   rowsPerPage?: number;
 }
 
 export function CustomersTable({
   count = 0,
-  rows = [],
   page = 0,
-  rowsPerPage = 0,
-}: CustomersTableProps): React.JSX.Element {
-  const rowIds = React.useMemo(() => {
-    return rows.map((customer) => customer.id);
-  }, [rows]);
+  rowsPerPage = 10,
+}: LancesTableProps): React.JSX.Element {
+  const [lances, setLances] = React.useState<Lance[]>([]);  // Estado para armazenar lances
+  const [loading, setLoading] = React.useState(false);  // Estado para controlar o carregamento
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [postoId, setPostoId] = React.useState<string | null>(null);
+  const [funcionarioId, setFuncionarioId] = React.useState<string | null>(null);
+  const [lanceId, setLanceId] = React.useState<string | null>(null);
+  const [condicoesSelecionadas, setCondicoesSelecionadas] = React.useState<string[]>([]);
+  const [observacoes, setObservacoes] = React.useState<string>('');
+  const [imagem, setImagem] = React.useState<File | null>(null);
+  const [produtoInfo, setProdutoInfo] = React.useState<any>(null);
 
-  const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
+  const baseUrl = Config.getApiUrl();
+  const mediaUrl=Config.getApiUrlMedia();
 
-  const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
-  const selectedAll = rows.length > 0 && selected?.size === rows.length;
+  const [openModal, setOpenModal] = React.useState(false);
+  const [modalType, setModalType] = React.useState<'entregar' | 'receber'>('entregar'); // 'entregar' ou 'receber'
+
+  const [error, setError] = React.useState<string | null>(null);  // Estado para mensagens de erro
+
+  // Função para buscar os lances da API
+  const fetchLances = async (postoId: string) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:8000/api/posto/${postoId}/lances/`);  // Fazendo requisição à API
+      setLances(response.data.lances);  // Armazena os lances no estado
+      console.log(response.data.lances);
+    } catch (error) {
+      console.error('Erro ao buscar os lances:', error);
+      setError('Erro ao carregar os lances, tente novamente mais tarde.'); // Exibe o erro na interface
+    } finally {
+      setLoading(false);
+    }
+  };
+  const condicoes = ['É recondicionado?', 'É selado?', 'Está danificado?', 'Está com garantia?'];  // Lista de condições
+
+  const toggleCondicao = (condicao: string) => {
+    setCondicoesSelecionadas((prevSelected) => {
+      if (prevSelected.includes(condicao)) {
+        return prevSelected.filter(item => item !== condicao);
+      } else {
+        return [...prevSelected, condicao];
+      }
+    });
+  };
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('userData');
+    if (token) {
+      const userData = JSON.parse(token);
+      const postoId = userData.posto?.id;
+      if (postoId) {
+        setPostoId(postoId);
+        setFuncionarioId(userData.id)
+        fetchLances(postoId);
+      }
+    }
+  }, []);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredLances = lances.filter((lance) =>
+    (lance.produto?.nome && lance.produto.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (lance.posto?.nome && lance.posto.nome.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // Função base para envio dos dados
+  const enviarRegistroProduto = async (url: string) => {
+    console.log('Enviando dados para a API...');
+    console.log('Dados:', {
+      postoId,
+      funcionarioId,
+      lanceId,
+      condicoesSelecionadas,
+      observacoes,
+      imagem,
+    });
+
+    if (!postoId || !funcionarioId || !lanceId || condicoesSelecionadas.length === 0) {
+      alert("Por favor, preencha todos os campos obrigatórios");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('posto_id', postoId);
+    formData.append('funcionario_id', funcionarioId);
+    formData.append('lance_id', lanceId);
+    formData.append('estado_produto', condicoesSelecionadas.join(', '));
+    formData.append('observacoes', observacoes);
+
+    if (imagem) {
+      formData.append('imagem', {
+        uri: imagem,
+        name: 'produto.jpg',
+        type: 'image/jpeg',
+      } as any);
+    }
+
+    try {
+      const res = await axios.post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Resposta da API:', res);
+      if (res.status !== 200) {
+        const errorResponse = await res.data;
+        setError(errorResponse?.error || 'Erro desconhecido');
+        return;
+      }
+
+      setOpenModal(false);  // Fecha o modal após sucesso
+      alert('Registro realizado com sucesso!');
+
+    } catch (error) {
+      console.error('Erro ao enviar dados:', error);
+      setError('Erro ao enviar os dados, tente novamente mais tarde.'); // Exibe o erro na interface
+      setOpenModal(false);
+    }
+  };
+
+  const handleOpenModal = (type: 'entregar' | 'receber', lanceId: string, produto: any) => {
+    setModalType(type);
+    setLanceId(lanceId);
+    setProdutoInfo(produto);  // Armazenar as informações do produto no estado
+    setOpenModal(true);  // Abre o modal
+  };
+  // Função para registrar entrega
+  const registrarEntrega = async () => {
+    console.log('Tentando registrar entrega');
+    const url = `${baseUrl}api/posto/entregar-produto/`;
+    await enviarRegistroProduto(url);
+  };
+
+  // Função para registrar recebimento
+  const registrarRecebimento = async () => {
+    const url = `${baseUrl}api/posto/receber-produto/`;
+    await enviarRegistroProduto(url);
+  };
+  
 
   return (
-    <Card>
+    <Card sx={{ p: 2 }}>
       <Box sx={{ overflowX: 'auto' }}>
+        <Box sx={{ p: 2 }}>
+          <OutlinedInput
+            value={searchTerm}
+            onChange={handleSearchChange}
+            fullWidth
+            placeholder="Pesquisar lance"
+            startAdornment={
+              <InputAdornment position="start">
+                <MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />
+              </InputAdornment>
+            }
+            sx={{ maxWidth: '500px' }}
+          />
+        </Box>
         <Table sx={{ minWidth: '800px' }}>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedAll}
-                  indeterminate={selectedSome}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      selectAll();
-                    } else {
-                      deselectAll();
-                    }
-                  }}
-                />
-              </TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Signed Up</TableCell>
+              <TableCell>Lance</TableCell>
+              <TableCell>Produto</TableCell>
+              <TableCell>Posto</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Preço</TableCell>
+              <TableCell>Data</TableCell>
+              <TableCell>Descrição</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => {
-              const isSelected = selected?.has(row.id);
-
-              return (
-                <TableRow hover key={row.id} selected={isSelected}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={isSelected}
-                      onChange={(event) => {
-                        if (event.target.checked) {
-                          selectOne(row.id);
-                        } else {
-                          deselectOne(row.id);
-                        }
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.avatar} />
-                      <Typography variant="subtitle2">{row.name}</Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell>
-                    {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
-                  <TableCell>{row.phone}</TableCell>
-                  <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
-                </TableRow>
-              );
-            })}
+            {filteredLances.map((lance) => (
+              <TableRow hover key={lance.id}>
+                <TableCell>{lance.id}</TableCell>
+                <TableCell><Button onClick={() => handleOpenModal('entregar', lance.id, lance.produto)}>
+          {lance.produto.nome}
+        </Button></TableCell>
+                <TableCell>{lance.posto.nome}</TableCell>
+                <TableCell>{lance.status}</TableCell>
+                <TableCell>{lance.preco}</TableCell>
+                <TableCell>{dayjs(lance.created_at).format('MMM D, YYYY')}</TableCell>
+                <TableCell>{lance.descricao}</TableCell>
+                <TableCell>
+                  <Button onClick={() => handleOpenModal('entregar', lance.id)} color="primary">Entregar</Button>
+                  <Button onClick={() => handleOpenModal('receber', lance.id)} color="secondary">Receber</Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </Box>
@@ -126,6 +250,107 @@ export function CustomersTable({
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
       />
+
+      {/* Exibindo erros usando Snackbar */}
+      {error && (
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
+          onClose={() => setError(null)}
+        >
+          <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
+
+
+<Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
+  <DialogTitle>{modalType === 'entregar' ? 'Registrar Entrega' : 'Registrar Recebimento'}</DialogTitle>
+  <DialogContent>
+    {/* Exibir as informações do produto */}
+    {produtoInfo && (
+      <Box>
+        <Typography variant="h6">Produto: {produtoInfo.nome}</Typography>
+        <Typography variant="body1">Descrição: {produtoInfo.descricao}</Typography>
+        <Typography variant="body1">Preço: {produtoInfo.preco}</Typography>
+        <Divider sx={{ my: 2 }} />
+
+        {/* Exibir imagens do produto usando a URL da mídia */}
+        {produtoInfo.imagens && produtoInfo.imagens.length > 0 && (
+          <Box sx={{ my: 2 }}>
+            <Typography variant="body1">Imagens do Produto:</Typography>
+            <img
+              src={`${mediaUrl}${produtoInfo.imagens[0].imagem}`}  // Aqui usamos o caminho correto da imagem
+              alt="Imagem do Produto"
+              style={{ maxWidth: '100%', marginTop: '10px' }}
+            />
+          </Box>
+        )}
+      </Box>
+    )}
+
+    {/* Exibir campos de condições, observações e imagem apenas para ações de "entregar" ou "receber" */}
+    {(modalType === 'entregar' || modalType === 'receber') && (
+      <>
+        <Typography variant="h6">Condições do Produto</Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {condicoes.map((condicao) => (
+            <FormControlLabel
+              key={condicao}
+              control={
+                <Checkbox
+                  checked={condicoesSelecionadas.includes(condicao)}
+                  onChange={() => toggleCondicao(condicao)}
+                  name={condicao}
+                />
+              }
+              label={condicao}
+            />
+          ))}
+        </Box>
+
+        {/* Observações */}
+        <TextField
+          fullWidth
+          label="Observações"
+          value={observacoes}
+          onChange={(e) => setObservacoes(e.target.value)}
+          margin="normal"
+          multiline
+          rows={4}
+        />
+
+        {/* Imagem */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImagem(e.target.files ? e.target.files[0] : null)}
+          style={{ marginTop: 10 }}
+        />
+      </>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenModal(false)} color="secondary">Cancelar</Button>
+    <Button
+      onClick={modalType === 'entregar' ? registrarEntrega : registrarRecebimento}
+      color="primary"
+    >
+      {modalType === 'entregar' ? 'Entregar' : 'Receber'}
+    </Button>
+  </DialogActions>
+</Dialog>
+      {/* Exibindo erro se ocorrer algum problema */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 }
