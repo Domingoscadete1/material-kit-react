@@ -58,12 +58,13 @@ export function CustomersTable({
   const [imagem, setImagem] = React.useState<File | null>(null);
   const [produtoInfo, setProdutoInfo] = React.useState<any>(null);
 
-  const baseUrl = Config.getApiUrl();
-  const mediaUrl=Config.getApiUrlMedia();
+  const baseUrl ="http://localhost:8000/";
+  const mediaUrl="http://localhost:8000";
 
   const [openModal, setOpenModal] = React.useState(false);
-  const [modalType, setModalType] = React.useState<'entregar' | 'receber'>('entregar'); // 'entregar' ou 'receber'
-
+  const [modalType, setModalType] = React.useState<'entregar' | 'receber' | 'negar' | 'devolver'>('entregar'); 
+  // 'entregar', 'receber', 'negar' ou 'devolver'
+  
   const [error, setError] = React.useState<string | null>(null);  // Estado para mensagens de erro
 
   // Função para buscar os lances da API
@@ -159,6 +160,8 @@ export function CustomersTable({
         setError(errorResponse?.error || 'Erro desconhecido');
         return;
       }
+      const registro_id=res.data.registro.id;
+      gerarFaturaPosto(registro_id);
 
       setOpenModal(false);  // Fecha o modal após sucesso
       alert('Registro realizado com sucesso!');
@@ -176,6 +179,23 @@ export function CustomersTable({
     setProdutoInfo(produto);  // Armazenar as informações do produto no estado
     setOpenModal(true);  // Abre o modal
   };
+  const gerarFaturaPosto = async (registroId) => {
+    try {
+      const apiUrl = `${baseUrl}api/registro-posto/${registroId}/`;
+      window.open(apiUrl, '_blank');  // Abre a URL em uma nova aba
+  
+      // Ou, se você quiser redirecionar para a página diretamente:
+      // window.location.href = apiUrl;
+      
+      // Optional: Alert if necessary
+      // Alert.alert("Fatura gerada com sucesso", `Fatura gerada com o ID: ${registroId}`);
+    } catch (error) {
+      console.error('Erro ao gerar fatura:', error);
+      alert( "Não foi possível gerar a fatura.");
+    }
+  };
+  
+  
   // Função para registrar entrega
   const registrarEntrega = async () => {
     console.log('Tentando registrar entrega');
@@ -188,7 +208,16 @@ export function CustomersTable({
     const url = `${baseUrl}api/posto/receber-produto/`;
     await enviarRegistroProduto(url);
   };
-  
+  const registrarNegacao = async () => {
+    console.log('Tentando registrar entrega');
+    const url = `${baseUrl}api/posto/negar-produto/`;
+    await enviarRegistroProduto(url);
+  };
+  const registrarDevolucao = async () => {
+    console.log('Tentando registrar entrega');
+    const url = `${baseUrl}api/posto/devolver-produto/`;
+    await enviarRegistroProduto(url);
+  };
 
   return (
     <Card sx={{ p: 2 }}>
@@ -214,6 +243,7 @@ export function CustomersTable({
               <TableCell>Produto</TableCell>
               <TableCell>Posto</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Quantidade</TableCell>
               <TableCell>Preço</TableCell>
               <TableCell>Data</TableCell>
               <TableCell>Descrição</TableCell>
@@ -227,14 +257,50 @@ export function CustomersTable({
           {lance.produto.nome}
         </Button></TableCell>
                 <TableCell>{lance.posto.nome}</TableCell>
-                <TableCell>{lance.status}</TableCell>
+                <TableCell>{lance.status_pos_pagamento}</TableCell>
+                <TableCell>{lance.quantidade}</TableCell>
                 <TableCell>{lance.preco}</TableCell>
                 <TableCell>{dayjs(lance.created_at).format('MMM D, YYYY')}</TableCell>
                 <TableCell>{lance.descricao}</TableCell>
                 <TableCell>
-                  <Button onClick={() => handleOpenModal('entregar', lance.id)} color="primary">Entregar</Button>
-                  <Button onClick={() => handleOpenModal('receber', lance.id)} color="secondary">Receber</Button>
-                </TableCell>
+  {lance.status_pos_pagamento
+ === "espera" && (
+    <Button 
+      onClick={() => handleOpenModal('receber', lance.id)} 
+      color="secondary"
+    >
+      Receber
+    </Button>
+  )}
+  {lance.status_pos_pagamento
+ === "recebido" && (
+    <>
+      <Button 
+        onClick={() => handleOpenModal('entregar', lance.id)} 
+        color="primary"
+      >
+        Entregar
+      </Button>
+      <Button 
+        onClick={() => handleOpenModal('negar', lance.id)} 
+        color="error"
+      >
+        Negar
+      </Button>
+      
+    </>
+  )}
+
+{lance.status_pos_pagamento === "recusado" && (
+    <Button 
+      onClick={() => handleOpenModal('devolver', lance.id)} 
+      color="warning"
+    >
+      Devolver
+    </Button>
+  )}
+</TableCell>
+
               </TableRow>
             ))}
           </TableBody>
@@ -266,7 +332,12 @@ export function CustomersTable({
 
 
 <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
-  <DialogTitle>{modalType === 'entregar' ? 'Registrar Entrega' : 'Registrar Recebimento'}</DialogTitle>
+<DialogTitle>
+    {modalType === 'entregar' && 'Registrar Entrega'}
+    {modalType === 'receber' && 'Registrar Recebimento'}
+    {modalType === 'negar' && 'Registrar Negação'}
+    {modalType === 'devolver' && 'Registrar Devolução'}
+  </DialogTitle>
   <DialogContent>
     {/* Exibir as informações do produto */}
     {produtoInfo && (
@@ -291,7 +362,7 @@ export function CustomersTable({
     )}
 
     {/* Exibir campos de condições, observações e imagem apenas para ações de "entregar" ou "receber" */}
-    {(modalType === 'entregar' || modalType === 'receber') && (
+    {(modalType === 'entregar' || modalType === 'receber' || modalType==='negar'  || modalType==='devolver') && (
       <>
         <Typography variant="h6">Condições do Produto</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -334,10 +405,15 @@ export function CustomersTable({
   <DialogActions>
     <Button onClick={() => setOpenModal(false)} color="secondary">Cancelar</Button>
     <Button
-      onClick={modalType === 'entregar' ? registrarEntrega : registrarRecebimento}
+      onClick={() => {
+        if (modalType === 'entregar') registrarEntrega();
+        if (modalType === 'receber') registrarRecebimento();
+        if (modalType === 'negar') registrarNegacao();
+        if (modalType === 'devolver') registrarDevolucao();
+      }}
       color="primary"
     >
-      {modalType === 'entregar' ? 'Entregar' : 'Receber'}
+      Confirmar
     </Button>
   </DialogActions>
 </Dialog>
