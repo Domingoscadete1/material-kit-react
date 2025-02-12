@@ -218,6 +218,34 @@ export function CustomersTable({
     const url = `${baseUrl}api/posto/devolver-produto/`;
     await enviarRegistroProduto(url);
   };
+  const handleEnviarCodigo = async (lanceId: string) => {
+    try {
+      const res = await axios.post(`${baseUrl}api/enviar-codigo/`, { lance_id: lanceId, tipo: 'entrega' });
+      alert(res.data.message);
+    } catch (error) {
+      console.error("Erro ao enviar código:", error);
+      alert("Erro ao enviar código.");
+    }
+  };
+  
+  const handleConfirmarCodigo = async (lanceId: string, codigo: string) => {
+    try {
+      const res = await axios.post(`${baseUrl}api/confirmar-codigo/${lanceId}/`, { codigo_verificacao: codigo });
+      alert(res.data.message);
+      window.location.reload()
+    } catch (error) {
+      console.error("Erro ao confirmar código:", error);
+      alert("Erro ao confirmar código.");
+    }
+  };
+  
+  const handleAbrirModalConfirmacao = (lanceId: string) => {
+    const codigo = prompt("Digite o código de verificação:");
+    if (codigo) {
+      handleConfirmarCodigo(lanceId, codigo);
+    }
+  };
+  
 
   return (
     <Card sx={{ p: 2 }}>
@@ -272,24 +300,33 @@ export function CustomersTable({
       Receber
     </Button>
   )}
-  {lance.status_pos_pagamento
- === "recebido" && (
-    <>
+  {lance.status_pos_pagamento === "recebido" && (
+  <>
+    {!lance.codigo_verificado ? (
+      <>
+        <Button 
+          onClick={() => handleEnviarCodigo(lance.id)} 
+          color="secondary"
+        >
+          Enviar Código
+        </Button>
+        <Button 
+          onClick={() => handleAbrirModalConfirmacao(lance.id)} 
+          color="warning"
+        >
+          Confirmar Código
+        </Button>
+      </>
+    ) : (
       <Button 
         onClick={() => handleOpenModal('entregar', lance.id)} 
         color="primary"
       >
-        Entregar
+        Entregar Produto
       </Button>
-      <Button 
-        onClick={() => handleOpenModal('negar', lance.id)} 
-        color="error"
-      >
-        Negar
-      </Button>
-      
-    </>
-  )}
+    )}
+  </>
+)}
 
 {lance.status_pos_pagamento === "recusado" && (
     <Button 
@@ -417,6 +454,7 @@ export function CustomersTable({
     </Button>
   </DialogActions>
 </Dialog>
+
       {/* Exibindo erro se ocorrer algum problema */}
       <Snackbar
         open={!!error}
