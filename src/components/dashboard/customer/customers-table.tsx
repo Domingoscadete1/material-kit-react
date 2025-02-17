@@ -218,9 +218,9 @@ export function CustomersTable({
     const url = `${baseUrl}api/posto/devolver-produto/`;
     await enviarRegistroProduto(url);
   };
-  const handleEnviarCodigo = async (lanceId: string) => {
+  const handleEnviarCodigo = async (lanceId: string,tipo?: string) => {
     try {
-      const res = await axios.post(`${baseUrl}api/enviar-codigo/`, { lance_id: lanceId, tipo: 'entrega' });
+      const res = await axios.post(`${baseUrl}api/enviar-codigo/`, { lance_id: lanceId, tipo: tipo || "entrega" });
       alert(res.data.message);
     } catch (error) {
       console.error("Erro ao enviar código:", error);
@@ -228,9 +228,9 @@ export function CustomersTable({
     }
   };
   
-  const handleConfirmarCodigo = async (lanceId: string, codigo: string) => {
+  const handleConfirmarCodigo = async (lanceId: string, codigo: string, tipo?: string) => {
     try {
-      const res = await axios.post(`${baseUrl}api/confirmar-codigo/${lanceId}/`, { codigo_verificacao: codigo });
+      const res = await axios.post(`${baseUrl}api/confirmar-codigo/${lanceId}/`, { codigo_verificacao: codigo , tipo: tipo || ""});
       alert(res.data.message);
       window.location.reload()
     } catch (error) {
@@ -318,24 +318,52 @@ export function CustomersTable({
         </Button>
       </>
     ) : (
+      <>
       <Button 
         onClick={() => handleOpenModal('entregar', lance.id)} 
         color="primary"
       >
         Entregar Produto
       </Button>
+       <Button 
+        onClick={() => handleOpenModal('negar', lance.id)} 
+        color="error"
+      >
+        Negar
+      </Button>
+      </>
     )}
+    
   </>
 )}
 
 {lance.status_pos_pagamento === "recusado" && (
-    <Button 
-      onClick={() => handleOpenModal('devolver', lance.id)} 
-      color="warning"
-    >
-      Devolver
-    </Button>
-  )}
+  <>
+    {lance.codigo_verificado_devolucao ? (
+      <>
+        <Button 
+          onClick={() => handleEnviarCodigo(lance.id,'devolucao')} 
+          color="secondary"
+        >
+          Enviar Código
+        </Button>
+        <Button 
+          onClick={() => handleAbrirModalConfirmacao(lance.id, 'devolucao')} 
+          color="warning"
+        >
+          Confirmar Código
+        </Button>
+      </>
+    ) : (
+      <Button 
+        onClick={() => handleOpenModal('devolver', lance.id)} 
+        color="warning"
+      >
+        Devolver
+      </Button>
+    )}
+  </>
+)}
 </TableCell>
 
               </TableRow>
