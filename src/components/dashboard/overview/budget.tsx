@@ -34,7 +34,12 @@ export function Budget({ diff, trend, sx, value }: BudgetProps): React.JSX.Eleme
   const fetchLances = async (postoId: string) => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/posto/registro/${postoId}/`);  // Fazendo requisição à API
+      const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/posto/registro/${postoId}/`,{
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          "ngrok-skip-browser-warning": "true",
+        },
+      });  // Fazendo requisição à API
       setLances(response.data);  // Armazena os lances no estado
       console.log(response.data.lances);
     } catch (error) {
