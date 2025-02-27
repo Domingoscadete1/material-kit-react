@@ -58,8 +58,8 @@ export function CustomersTable({
   const [imagem, setImagem] = React.useState<File | null>(null);
   const [produtoInfo, setProdutoInfo] = React.useState<any>(null);
 
-  const baseUrl ="http://localhost:8000/";
-  const mediaUrl="http://localhost:8000";
+  const baseUrl ="https://fad7-154-71-159-172.ngrok-free.app/";
+  const mediaUrl="https://fad7-154-71-159-172.ngrok-free.app";
 
   const [openModal, setOpenModal] = React.useState(false);
   const [modalType, setModalType] = React.useState<'entregar' | 'receber' | 'negar' | 'devolver'>('entregar'); 
@@ -71,7 +71,12 @@ export function CustomersTable({
   const fetchLances = async (postoId: string) => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/posto/${postoId}/lances/`);  // Fazendo requisição à API
+      const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/posto/${postoId}/lances/`,{
+        headers: {
+          'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": "true",
+        },
+      });  // Fazendo requisição à API
       setLances(response.data.lances);  // Armazena os lances no estado
       console.log(response.data.lances);
     } catch (error) {
@@ -146,11 +151,12 @@ export function CustomersTable({
         type: 'image/jpeg',
       } as any);
     }
-
+    
     try {
       const res = await axios.post(url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          "ngrok-skip-browser-warning": "true",
         },
       });
 
@@ -220,7 +226,12 @@ export function CustomersTable({
   };
   const handleEnviarCodigo = async (lanceId: string,tipo?: string) => {
     try {
-      const res = await axios.post(`${baseUrl}api/enviar-codigo/`, { lance_id: lanceId, tipo: tipo || "entrega" });
+      const res = await axios.post(`${baseUrl}api/enviar-codigo/`, { lance_id: lanceId, tipo: tipo || "entrega" },{
+        headers: {
+          'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
       alert(res.data.message);
     } catch (error) {
       console.error("Erro ao enviar código:", error);
@@ -230,7 +241,12 @@ export function CustomersTable({
   
   const handleConfirmarCodigo = async (lanceId: string, codigo: string, tipo?: string) => {
     try {
-      const res = await axios.post(`${baseUrl}api/confirmar-codigo/${lanceId}/`, { codigo_verificacao: codigo , tipo: tipo || ""});
+      const res = await axios.post(`${baseUrl}api/confirmar-codigo/${lanceId}/`, { codigo_verificacao: codigo , tipo: tipo || ""},{
+        headers: {
+          'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
       alert(res.data.message);
       window.location.reload()
     } catch (error) {
