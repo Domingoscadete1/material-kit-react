@@ -47,7 +47,6 @@ export function LatestProducts(): React.JSX.Element {
     try {
       const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/posto/registro/${postoId}/`,{
         headers: {
-          'Authorization': `Bearer ${token}`,
           "ngrok-skip-browser-warning": "true",
         },
       });
