@@ -50,7 +50,7 @@ export function LatestProducts(): React.JSX.Element {
           "ngrok-skip-browser-warning": "true",
         },
       });
-      setLatestProducts(response.data.latest);  // Armazena os últimos produtos
+      setLatestProducts(response.data.latest || []);  // Armazena os últimos produtos
       console.log(response.data);
     } catch (error) {
       console.error('Erro ao buscar os últimos produtos:', error);
