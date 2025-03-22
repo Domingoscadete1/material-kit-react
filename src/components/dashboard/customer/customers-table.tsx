@@ -171,6 +171,7 @@ export function CustomersTable({
 
       setOpenModal(false);  // Fecha o modal após sucesso
       alert('Registro realizado com sucesso!');
+      window.location.reload();
 
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
@@ -233,6 +234,7 @@ export function CustomersTable({
         },
       });
       alert(res.data.message);
+      window.location.reload();
     } catch (error) {
       console.error("Erro ao enviar código:", error);
       alert("Erro ao enviar código.");

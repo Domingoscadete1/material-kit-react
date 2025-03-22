@@ -53,7 +53,7 @@ export function LatestOrders({ orders = [], sx }: LatestOrdersProps): React.JSX.
     setLoading(true);
     try {
       const response = await axios.get(`http://localhost:8000/api/posto/registro/${postoId}/`);
-      setLatestRecords(response.data.latest); // Armazena os últimos registros
+      setLatestRecords(response.data.results.latest || []); // Armazena os últimos registros
       console.log(response.data);
     } catch (error) {
       console.error('Erro ao buscar os últimos registros:', error);

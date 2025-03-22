@@ -50,7 +50,9 @@ export function LatestProducts(): React.JSX.Element {
           "ngrok-skip-browser-warning": "true",
         },
       });
-      setLatestProducts(response.data.latest || []);  // Armazena os últimos produtos
+      const latest = response.data.results?.latest;
+      console.log(latest);
+    setLatestProducts(Array.isArray(latest) ? latest : []);  // Armazena os últimos produtos
       console.log(response.data);
     } catch (error) {
       console.error('Erro ao buscar os últimos produtos:', error);
@@ -86,7 +88,7 @@ export function LatestProducts(): React.JSX.Element {
         <p>{error}</p>
       ) : (
         <List>
-          {latestProducts.map((product, index) => (
+          {(latestProducts || []).map((product, index) => (
             <ListItem divider={index < latestProducts.length - 1} key={product.id}>
                 <ListItemAvatar>
                 {product.transacao?.lance?.produto?.imagens?.[0]?.imagem ? (
