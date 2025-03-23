@@ -45,7 +45,7 @@ export function LatestProducts(): React.JSX.Element {
   const fetchLatestProducts = async (postoId: string) => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/posto/registro/${postoId}/`,{
+      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/posto/registro/${postoId}/`,{
         headers: {
           "ngrok-skip-browser-warning": "true",
         },

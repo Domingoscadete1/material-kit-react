@@ -58,8 +58,8 @@ export function CustomersTable({
   const [imagem, setImagem] = React.useState<File | null>(null);
   const [produtoInfo, setProdutoInfo] = React.useState<any>(null);
 
-  const baseUrl ="https://fad7-154-71-159-172.ngrok-free.app/";
-  const mediaUrl="https://fad7-154-71-159-172.ngrok-free.app";
+  const baseUrl ="https://dce9-154-71-159-172.ngrok-free.app/";
+  const mediaUrl="https://dce9-154-71-159-172.ngrok-free.app";
 
   const [openModal, setOpenModal] = React.useState(false);
   const [modalType, setModalType] = React.useState<'entregar' | 'receber' | 'negar' | 'devolver'>('entregar'); 
@@ -71,7 +71,7 @@ export function CustomersTable({
   const fetchLances = async (postoId: string) => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/posto/${postoId}/lances/`,{
+      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/posto/${postoId}/lances/`,{
         headers: {
           'Content-Type': 'application/json',
           "ngrok-skip-browser-warning": "true",
