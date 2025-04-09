@@ -16,11 +16,11 @@ import axios from 'axios';  // Para consumir a API
 import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import Config from '@/components/Config';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Snackbar, Alert } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-
+import Config from "../../../../Config";
+import { fetchWithToken } from '../../../../authService';
 function noop(): void {
   // do nothing
 }
@@ -58,8 +58,8 @@ export function CustomersTable({
   const [imagem, setImagem] = React.useState<File | null>(null);
   const [produtoInfo, setProdutoInfo] = React.useState<any>(null);
 
-  const baseUrl ="https://dce9-154-71-159-172.ngrok-free.app/";
-  const mediaUrl="https://dce9-154-71-159-172.ngrok-free.app";
+  const baseUrl =Config.getApiUrl();
+  const mediaUrl=Config.getApiUrlMedia();
 
   const [openModal, setOpenModal] = React.useState(false);
   const [modalType, setModalType] = React.useState<'entregar' | 'receber' | 'negar' | 'devolver'>('entregar'); 
@@ -71,14 +71,16 @@ export function CustomersTable({
   const fetchLances = async (postoId: string) => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/posto/${postoId}/lances/`,{
+      const response = await fetchWithToken(`api/posto/${postoId}/lances/`,{
+        method:'GET',
         headers: {
           'Content-Type': 'application/json',
           "ngrok-skip-browser-warning": "true",
         },
       });  // Fazendo requisição à API
-      setLances(response.data.lances);  // Armazena os lances no estado
-      console.log(response.data.lances);
+      const data=await response.json();
+      setLances(data.lances);  // Armazena os lances no estado
+      console.log(data.lances);
     } catch (error) {
       console.error('Erro ao buscar os lances:', error);
       setError('Erro ao carregar os lances, tente novamente mais tarde.'); // Exibe o erro na interface
@@ -153,20 +155,23 @@ export function CustomersTable({
     }
     
     try {
-      const res = await axios.post(url, formData, {
+      const res = await fetchWithToken(url, {
+        method:'POST',
         headers: {
-          'Content-Type': 'multipart/form-data',
+          
           "ngrok-skip-browser-warning": "true",
         },
+        body:formData
       });
+      const data=await res.json();
 
       console.log('Resposta da API:', res);
       if (res.status !== 200) {
-        const errorResponse = await res.data;
+        const errorResponse = await data;
         setError(errorResponse?.error || 'Erro desconhecido');
         return;
       }
-      const registro_id=res.data.registro.id;
+      const registro_id=data.registro.id;
       gerarFaturaPosto(registro_id);
 
       setOpenModal(false);  // Fecha o modal após sucesso
@@ -191,11 +196,7 @@ export function CustomersTable({
       const apiUrl = `${baseUrl}api/registro-posto/${registroId}/`;
       window.open(apiUrl, '_blank');  // Abre a URL em uma nova aba
   
-      // Ou, se você quiser redirecionar para a página diretamente:
-      // window.location.href = apiUrl;
       
-      // Optional: Alert if necessary
-      // Alert.alert("Fatura gerada com sucesso", `Fatura gerada com o ID: ${registroId}`);
     } catch (error) {
       console.error('Erro ao gerar fatura:', error);
       alert( "Não foi possível gerar a fatura.");
@@ -206,34 +207,39 @@ export function CustomersTable({
   // Função para registrar entrega
   const registrarEntrega = async () => {
     console.log('Tentando registrar entrega');
-    const url = `${baseUrl}api/posto/entregar-produto/`;
+    const url = `api/posto/entregar-produto/`;
     await enviarRegistroProduto(url);
   };
 
   // Função para registrar recebimento
   const registrarRecebimento = async () => {
-    const url = `${baseUrl}api/posto/receber-produto/`;
+    const url = `api/posto/receber-produto/`;
     await enviarRegistroProduto(url);
   };
   const registrarNegacao = async () => {
     console.log('Tentando registrar entrega');
-    const url = `${baseUrl}api/posto/negar-produto/`;
+    const url = `api/posto/negar-produto/`;
     await enviarRegistroProduto(url);
   };
   const registrarDevolucao = async () => {
     console.log('Tentando registrar entrega');
-    const url = `${baseUrl}api/posto/devolver-produto/`;
+    const url = `api/posto/devolver-produto/`;
     await enviarRegistroProduto(url);
   };
   const handleEnviarCodigo = async (lanceId: string,tipo?: string) => {
     try {
-      const res = await axios.post(`${baseUrl}api/enviar-codigo/`, { lance_id: lanceId, tipo: tipo || "entrega" },{
+      const res = await fetchWithToken(`api/enviar-codigo/`, {
+        method:'POST',
         headers: {
           'Content-Type': 'application/json',
           "ngrok-skip-browser-warning": "true",
         },
+        body:JSON.stringify(
+          { lance_id: lanceId, tipo: tipo || "entrega" },
+        )
       });
-      alert(res.data.message);
+      const data=await res.json();
+      alert(data.message);
       window.location.reload();
     } catch (error) {
       console.error("Erro ao enviar código:", error);
@@ -243,13 +249,18 @@ export function CustomersTable({
   
   const handleConfirmarCodigo = async (lanceId: string, codigo: string, tipo?: string) => {
     try {
-      const res = await axios.post(`${baseUrl}api/confirmar-codigo/${lanceId}/`, { codigo_verificacao: codigo , tipo: tipo || ""},{
+      const res = await fetchWithToken(`api/confirmar-codigo/${lanceId}/`, {
+        method:'POST',
         headers: {
           'Content-Type': 'application/json',
           "ngrok-skip-browser-warning": "true",
         },
+        body:JSON.stringify(
+          { codigo_verificacao: codigo , tipo: tipo || ""},
+        )
       });
-      alert(res.data.message);
+      const data=await res.json();
+      alert(data.message);
       window.location.reload()
     } catch (error) {
       console.error("Erro ao confirmar código:", error);
