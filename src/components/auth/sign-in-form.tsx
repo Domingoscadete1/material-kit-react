@@ -23,6 +23,12 @@ import { authClient } from '@/lib/auth/client';
 import { useUser } from '@/hooks/use-user';
 import Config from '../Config';
 import axios from 'axios';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+
 
 const schema = zod.object({
   username: zod.string().min(1, { message: 'Username is required' }), 
@@ -48,6 +54,11 @@ export function SignInForm(): React.JSX.Element {
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
   const [isPending, setIsPending] = React.useState<boolean>(false);
   const [userData, setUserData] = React.useState<UserData | null>(null);
+  const [openResetDialog, setOpenResetDialog] = React.useState(false);
+  const [resetEmail, setResetEmail] = React.useState('');
+  const [resetLoading, setResetLoading] = React.useState(false);
+  const [resetMessage, setResetMessage] = React.useState('');
+  const [resetError, setResetError] = React.useState('');
 
 
   const {
@@ -71,6 +82,44 @@ export function SignInForm(): React.JSX.Element {
 
     fetchUserData();
   }, []);
+  const handleOpenResetDialog = () => {
+    setOpenResetDialog(true);
+  };
+
+  const handleCloseResetDialog = () => {
+    setOpenResetDialog(false);
+    setResetEmail('');
+    setResetMessage('');
+    setResetError('');
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetEmail) {
+      setResetError('Por favor, insira seu e-mail');
+      return;
+    }
+
+    try {
+      setResetLoading(true);
+      setResetError('');
+      setResetMessage('');
+
+      const response = await axios.post(
+        `${baseUrl}api/password-reset/`,
+        { email: resetEmail },
+        { headers: { 'Content-Type': 'application/json', "ngrok-skip-browser-warning": "true" } }
+      );
+
+      if (response.status === 200) {
+        setResetMessage('E-mail de redefinição enviado. Verifique sua caixa de entrada.');
+      }
+    } catch (error) {
+      console.error("Erro ao solicitar redefinição:", error);
+      setResetError(error.response?.data?.error || 'Erro ao solicitar redefinição de senha');
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
 
   const onSubmit = React.useCallback(
@@ -225,6 +274,51 @@ export function SignInForm(): React.JSX.Element {
           </Button>
         </Stack>
       </form>
+
+       {/* Password Reset Dialog */}
+       <Dialog open={openResetDialog} onClose={handleCloseResetDialog}>
+        <DialogTitle>Reset Password</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Enter your email address to receive a password reset link
+          </Typography>
+          
+          {resetError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {resetError}
+            </Alert>
+          )}
+          
+          {resetMessage && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {resetMessage}
+            </Alert>
+          )}
+          
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Email"
+            type="email"
+            value={resetEmail}
+            onChange={(e) => setResetEmail(e.target.value)}
+            disabled={resetLoading}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseResetDialog} disabled={resetLoading}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleResetPassword} 
+            variant="contained" 
+            color="primary" 
+            disabled={resetLoading}
+          >
+            {resetLoading ? 'Sending...' : 'Send Link'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 }

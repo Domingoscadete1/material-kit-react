@@ -21,7 +21,7 @@ import { jwtDecode } from 'jwt-decode';
 import { paths } from '@/paths';
 import { authClient } from '@/lib/auth/client';
 import { useUser } from '@/hooks/use-user';
-import Config from '../Config';
+import Config from './Config';
 import axios from 'axios';
 
 const schema = zod.object({
