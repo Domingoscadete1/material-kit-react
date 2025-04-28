@@ -179,7 +179,7 @@ export function SignInForm(): React.JSX.Element {
     console.log("Iniciando requisição para buscar dados do usuário...");
   
     try {
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/user/`, {
+      const response = await axios.get(`${baseUrl}api/user/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           "ngrok-skip-browser-warning": "true",
