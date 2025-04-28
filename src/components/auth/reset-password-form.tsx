@@ -14,7 +14,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import Config from '../../../config'; // Ajuste o caminho conforme necessário
+import Config from '../../../config'; 
 
 const schema = zod.object({ 
   email: zod.string().min(1, { message: 'Email is required' }).email() 
