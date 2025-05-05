@@ -23,8 +23,7 @@ const user = {
 export function AccountInfo(): React.JSX.Element {
   const baseUrl = Config.getApiUrl();
   const mediaUrl=Config.getApiUrlMedia();
-  const [userData, setUserData] = React.useState<[]>([]);  // Estado para armazenar lances
-
+  const [userData, setUserData] = React.useState<[]>([]);  
 
   React.useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -34,6 +33,7 @@ export function AccountInfo(): React.JSX.Element {
       
     }
   }, []);
+
   return (
     <Card>
       <CardContent>
@@ -46,16 +46,10 @@ export function AccountInfo(): React.JSX.Element {
             <Typography color="text.secondary" variant="body2">
               {userData.endereco} 
             </Typography>
-            <Typography color="text.secondary" variant="body2">
-              {user.timezone}
-            </Typography>
           </Stack>
         </Stack>
       </CardContent>
       <Divider />
-      <CardActions>
-        
-      </CardActions>
     </Card>
   );
 }

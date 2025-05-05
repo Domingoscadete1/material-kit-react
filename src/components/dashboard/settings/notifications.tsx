@@ -21,7 +21,7 @@ export function Notifications(): React.JSX.Element {
         event.preventDefault();
       }}
     >
-      <Card>
+      {/* <Card>
         <CardHeader subheader="Manage the notifications" title="Notifications" />
         <Divider />
         <CardContent>
@@ -35,22 +35,13 @@ export function Notifications(): React.JSX.Element {
                 </FormGroup>
               </Stack>
             </Grid>
-            {/* <Grid md={4} sm={6} xs={12}>
-              <Stack spacing={1}>
-                <Typography variant="h6">Phone</Typography>
-                <FormGroup>
-                  <FormControlLabel control={<Checkbox defaultChecked />} label="Email" />
-                  <FormControlLabel control={<Checkbox />} label="Security updates" />
-                </FormGroup>
-              </Stack>
-            </Grid> */}
           </Grid>
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
           <Button variant="contained">Save changes</Button>
         </CardActions>
-      </Card>
+      </Card> */}
     </form>
   );
 }

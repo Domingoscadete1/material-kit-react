@@ -42,37 +42,37 @@ export function AccountDetailsForm(): React.JSX.Element {
       }}
     >
       <Card>
-        <CardHeader subheader="The information can be edited" title="Profile" />
+        <CardHeader subheader="Seus dados..." title="Perfil" />
         <Divider />
         <CardContent>
           <Grid container spacing={3}>
             <Grid md={6} xs={12}>
               <FormControl fullWidth required>
-                <InputLabel>First name</InputLabel>
+                <InputLabel>Primeiro Nome</InputLabel>
                 <OutlinedInput defaultValue={userData.nome} label="First name" name="firstName" disabled/>
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
               <FormControl fullWidth required>
-                <InputLabel>Last name</InputLabel>
+                <InputLabel>Último Nome</InputLabel>
                 <OutlinedInput defaultValue={userData.nome}label="Last name" name="lastName" disabled/>
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
               <FormControl fullWidth required>
-                <InputLabel>Email address</InputLabel>
+                <InputLabel>Email</InputLabel>
                 <OutlinedInput defaultValue={userData.email} label="Email address" name="email" disabled/>
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
               <FormControl fullWidth>
-                <InputLabel>Phone number</InputLabel>
+                <InputLabel>Número de Telefone</InputLabel>
                 <OutlinedInput label="Phone number" defaultValue={userData.numero_telefone}name="phone" type="tel" disabled />
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
               <FormControl fullWidth>
-                <InputLabel>State</InputLabel>
+                <InputLabel>Endereço</InputLabel>
                 <Select defaultValue={userData.endereco} label="State" name="state" variant="outlined" disabled>
                   {states.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
@@ -82,18 +82,9 @@ export function AccountDetailsForm(): React.JSX.Element {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>City</InputLabel>
-                <OutlinedInput defaultValue={userData.endereco}label="City" disabled/>
-              </FormControl>
-            </Grid>
           </Grid>
         </CardContent>
         <Divider />
-        <CardActions sx={{ justifyContent: 'flex-end' }}>
-          
-        </CardActions>
       </Card>
     </form>
   );

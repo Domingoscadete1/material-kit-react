@@ -28,7 +28,7 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
   const { checkSession } = useUser();
 
   const router = useRouter();
-  const [userData, setUserData] = React.useState<[]>([]);  // Estado para armazenar lances
+  const [userData, setUserData] = React.useState<[]>([]);  
   const baseUrl = Config.getApiUrl();
   const mediaUrl=Config.getApiUrlMedia();
 
@@ -50,12 +50,8 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
         return;
       }
 
-      // Refresh the auth state
       await checkSession?.();
-
-      // UserProvider, for this case, will not refresh the router and we need to do it manually
       router.refresh();
-      // After refresh, AuthGuard will handle the redirect
     } catch (err) {
       logger.error('Sign out error', err);
     }
@@ -81,19 +77,19 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
           <ListItemIcon>
             <GearSixIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>
-          Settings
+          Definições
         </MenuItem>
         <MenuItem component={RouterLink} href={paths.dashboard.account} onClick={onClose}>
           <ListItemIcon>
             <UserIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>
-          Profile
+          Perfil
         </MenuItem>
-        <MenuItem onClick={handleSignOut}>
+        <MenuItem onClick={handleSignOut} sx={{ color: 'red' }}>
           <ListItemIcon>
-            <SignOutIcon fontSize="var(--icon-fontSize-md)" />
+            <SignOutIcon fontSize="var(--icon-fontSize-md)" color= 'red' />
           </ListItemIcon>
-          Sign out
+          Terminar Sessão
         </MenuItem>
       </MenuList>
     </Popover>

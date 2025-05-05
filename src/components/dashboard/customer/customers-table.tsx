@@ -58,27 +58,27 @@ export function CustomersTable({
   const [imagem, setImagem] = React.useState<File | null>(null);
   const [produtoInfo, setProdutoInfo] = React.useState<any>(null);
 
-  const baseUrl =Config.getApiUrl();
-  const mediaUrl=Config.getApiUrlMedia();
+  const baseUrl = Config.getApiUrl();
+  const mediaUrl = Config.getApiUrlMedia();
 
   const [openModal, setOpenModal] = React.useState(false);
-  const [modalType, setModalType] = React.useState<'entregar' | 'receber' | 'negar' | 'devolver'>('entregar'); 
+  const [modalType, setModalType] = React.useState<'Entregar' | 'Receber' | 'Negar' | 'Devolver'>('Entregar');
   // 'entregar', 'receber', 'negar' ou 'devolver'
-  
+
   const [error, setError] = React.useState<string | null>(null);  // Estado para mensagens de erro
 
   // Função para buscar os lances da API
   const fetchLances = async (postoId: string) => {
     setLoading(true);
     try {
-      const response = await fetchWithToken(`api/posto/${postoId}/lances/`,{
-        method:'GET',
+      const response = await fetchWithToken(`api/posto/${postoId}/lances/`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           "ngrok-skip-browser-warning": "true",
         },
       });  // Fazendo requisição à API
-      const data=await response.json();
+      const data = await response.json();
       setLances(data.lances);  // Armazena os lances no estado
       console.log(data.lances);
     } catch (error) {
@@ -153,17 +153,17 @@ export function CustomersTable({
         type: 'image/jpeg',
       } as any);
     }
-    
+
     try {
       const res = await fetchWithToken(url, {
-        method:'POST',
+        method: 'POST',
         headers: {
-          
+
           "ngrok-skip-browser-warning": "true",
         },
-        body:formData
+        body: formData
       });
-      const data=await res.json();
+      const data = await res.json();
 
       console.log('Resposta da API:', res);
       if (res.status !== 200) {
@@ -171,7 +171,7 @@ export function CustomersTable({
         setError(errorResponse?.error || 'Erro desconhecido');
         return;
       }
-      const registro_id=data.registro.id;
+      const registro_id = data.registro.id;
       gerarFaturaPosto(registro_id);
 
       setOpenModal(false);  // Fecha o modal após sucesso
@@ -195,15 +195,15 @@ export function CustomersTable({
     try {
       const apiUrl = `${baseUrl}api/registro-posto/${registroId}/`;
       window.open(apiUrl, '_blank');  // Abre a URL em uma nova aba
-  
-      
+
+
     } catch (error) {
       console.error('Erro ao gerar fatura:', error);
-      alert( "Não foi possível gerar a fatura.");
+      alert("Não foi possível gerar a fatura.");
     }
   };
-  
-  
+
+
   // Função para registrar entrega
   const registrarEntrega = async () => {
     console.log('Tentando registrar entrega');
@@ -226,19 +226,19 @@ export function CustomersTable({
     const url = `api/posto/devolver-produto/`;
     await enviarRegistroProduto(url);
   };
-  const handleEnviarCodigo = async (lanceId: string,tipo?: string) => {
+  const handleEnviarCodigo = async (lanceId: string, tipo?: string) => {
     try {
       const res = await fetchWithToken(`api/enviar-codigo/`, {
-        method:'POST',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           "ngrok-skip-browser-warning": "true",
         },
-        body:JSON.stringify(
+        body: JSON.stringify(
           { lance_id: lanceId, tipo: tipo || "entrega" },
         )
       });
-      const data=await res.json();
+      const data = await res.json();
       alert(data.message);
       window.location.reload();
     } catch (error) {
@@ -246,20 +246,20 @@ export function CustomersTable({
       alert("Erro ao enviar código.");
     }
   };
-  
+
   const handleConfirmarCodigo = async (lanceId: string, codigo: string, tipo?: string) => {
     try {
       const res = await fetchWithToken(`api/confirmar-codigo/${lanceId}/`, {
-        method:'POST',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           "ngrok-skip-browser-warning": "true",
         },
-        body:JSON.stringify(
-          { codigo_verificacao: codigo , tipo: tipo || ""},
+        body: JSON.stringify(
+          { codigo_verificacao: codigo, tipo: tipo || "" },
         )
       });
-      const data=await res.json();
+      const data = await res.json();
       alert(data.message);
       window.location.reload()
     } catch (error) {
@@ -267,14 +267,13 @@ export function CustomersTable({
       alert("Erro ao confirmar código.");
     }
   };
-  
+
   const handleAbrirModalConfirmacao = (lanceId: string) => {
     const codigo = prompt("Digite o código de verificação:");
     if (codigo) {
       handleConfirmarCodigo(lanceId, codigo);
     }
   };
-  
 
   return (
     <Card sx={{ p: 2 }}>
@@ -311,8 +310,8 @@ export function CustomersTable({
               <TableRow hover key={lance.id}>
                 <TableCell>{lance.id}</TableCell>
                 <TableCell><Button onClick={() => handleOpenModal('entregar', lance.id, lance.produto)}>
-          {lance.produto.nome}
-        </Button></TableCell>
+                  {lance.produto.nome}
+                </Button></TableCell>
                 <TableCell>{lance.posto.nome}</TableCell>
                 <TableCell>{lance.status_pos_pagamento}</TableCell>
                 <TableCell>{lance.quantidade}</TableCell>
@@ -320,80 +319,80 @@ export function CustomersTable({
                 <TableCell>{dayjs(lance.created_at).format('MMM D, YYYY')}</TableCell>
                 <TableCell>{lance.descricao}</TableCell>
                 <TableCell>
-  {lance.status_pos_pagamento
- === "espera" && (
-    <Button 
-      onClick={() => handleOpenModal('receber', lance.id)} 
-      color="secondary"
-    >
-      Receber
-    </Button>
-  )}
-  {lance.status_pos_pagamento === "recebido" && (
-  <>
-    {!lance.codigo_verificado ? (
-      <>
-        <Button 
-          onClick={() => handleEnviarCodigo(lance.id)} 
-          color="secondary"
-        >
-          Enviar Código
-        </Button>
-        <Button 
-          onClick={() => handleAbrirModalConfirmacao(lance.id)} 
-          color="warning"
-        >
-          Confirmar Código
-        </Button>
-      </>
-    ) : (
-      <>
-      <Button 
-        onClick={() => handleOpenModal('entregar', lance.id)} 
-        color="primary"
-      >
-        Entregar Produto
-      </Button>
-       <Button 
-        onClick={() => handleOpenModal('negar', lance.id)} 
-        color="error"
-      >
-        Negar
-      </Button>
-      </>
-    )}
-    
-  </>
-)}
+                  {lance.status_pos_pagamento
+                    === "espera" && (
+                      <Button
+                        onClick={() => handleOpenModal('receber', lance.id)}
+                        color="secondary"
+                      >
+                        Receber
+                      </Button>
+                    )}
+                  {lance.status_pos_pagamento === "recebido" && (
+                    <>
+                      {!lance.codigo_verificado ? (
+                        <>
+                          <Button
+                            onClick={() => handleEnviarCodigo(lance.id)}
+                            color="secondary"
+                          >
+                            Enviar Código
+                          </Button>
+                          <Button
+                            onClick={() => handleAbrirModalConfirmacao(lance.id)}
+                            color="warning"
+                          >
+                            Confirmar Código
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            onClick={() => handleOpenModal('entregar', lance.id)}
+                            color="primary"
+                          >
+                            Entregar Produto
+                          </Button>
+                          <Button
+                            onClick={() => handleOpenModal('negar', lance.id)}
+                            color="error"
+                          >
+                            Negar
+                          </Button>
+                        </>
+                      )}
 
-{lance.status_pos_pagamento === "recusado" && (
-  <>
-    {lance.codigo_verificado_devolucao ? (
-      <>
-        <Button 
-          onClick={() => handleEnviarCodigo(lance.id,'devolucao')} 
-          color="secondary"
-        >
-          Enviar Código
-        </Button>
-        <Button 
-          onClick={() => handleAbrirModalConfirmacao(lance.id, 'devolucao')} 
-          color="warning"
-        >
-          Confirmar Código
-        </Button>
-      </>
-    ) : (
-      <Button 
-        onClick={() => handleOpenModal('devolver', lance.id)} 
-        color="warning"
-      >
-        Devolver
-      </Button>
-    )}
-  </>
-)}
-</TableCell>
+                    </>
+                  )}
+
+                  {lance.status_pos_pagamento === "recusado" && (
+                    <>
+                      {lance.codigo_verificado_devolucao ? (
+                        <>
+                          <Button
+                            onClick={() => handleEnviarCodigo(lance.id, 'devolucao')}
+                            color="secondary"
+                          >
+                            Enviar Código
+                          </Button>
+                          <Button
+                            onClick={() => handleAbrirModalConfirmacao(lance.id, 'devolucao')}
+                            color="warning"
+                          >
+                            Confirmar Código
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          onClick={() => handleOpenModal('devolver', lance.id)}
+                          color="warning"
+                        >
+                          Devolver
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </TableCell>
 
               </TableRow>
             ))}
@@ -425,92 +424,92 @@ export function CustomersTable({
       )}
 
 
-<Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
-<DialogTitle>
-    {modalType === 'entregar' && 'Registrar Entrega'}
-    {modalType === 'receber' && 'Registrar Recebimento'}
-    {modalType === 'negar' && 'Registrar Negação'}
-    {modalType === 'devolver' && 'Registrar Devolução'}
-  </DialogTitle>
-  <DialogContent>
-    {/* Exibir as informações do produto */}
-    {produtoInfo && (
-      <Box>
-        <Typography variant="h6">Produto: {produtoInfo.nome}</Typography>
-        <Typography variant="body1">Descrição: {produtoInfo.descricao}</Typography>
-        <Typography variant="body1">Preço: {produtoInfo.preco}</Typography>
-        <Divider sx={{ my: 2 }} />
+      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
+        <DialogTitle>
+          {modalType === 'entregar' && 'Registrar Entrega'}
+          {modalType === 'receber' && 'Registrar Recebimento'}
+          {modalType === 'negar' && 'Registrar Negação'}
+          {modalType === 'devolver' && 'Registrar Devolução'}
+        </DialogTitle>
+        <DialogContent>
+          {/* Exibir as informações do produto */}
+          {produtoInfo && (
+            <Box>
+              <Typography variant="h6">Produto: {produtoInfo.nome}</Typography>
+              <Typography variant="body1">Descrição: {produtoInfo.descricao}</Typography>
+              <Typography variant="body1">Preço: {produtoInfo.preco}</Typography>
+              <Divider sx={{ my: 2 }} />
 
-        {/* Exibir imagens do produto usando a URL da mídia */}
-        {produtoInfo.imagens && produtoInfo.imagens.length > 0 && (
-          <Box sx={{ my: 2 }}>
-            <Typography variant="body1">Imagens do Produto:</Typography>
-            <img
-              src={`${mediaUrl}${produtoInfo.imagens[0].imagem}`}  // Aqui usamos o caminho correto da imagem
-              alt="Imagem do Produto"
-              style={{ maxWidth: '100%', marginTop: '10px' }}
-            />
-          </Box>
-        )}
-      </Box>
-    )}
+              {/* Exibir imagens do produto usando a URL da mídia */}
+              {produtoInfo.imagens && produtoInfo.imagens.length > 0 && (
+                <Box sx={{ my: 2 }}>
+                  <Typography variant="body1">Imagens do Produto:</Typography>
+                  <img
+                    src={`${mediaUrl}${produtoInfo.imagens[0].imagem}`}  // Aqui usamos o caminho correto da imagem
+                    alt="Imagem do Produto"
+                    style={{ maxWidth: '100%', marginTop: '10px' }}
+                  />
+                </Box>
+              )}
+            </Box>
+          )}
 
-    {/* Exibir campos de condições, observações e imagem apenas para ações de "entregar" ou "receber" */}
-    {(modalType === 'entregar' || modalType === 'receber' || modalType==='negar'  || modalType==='devolver') && (
-      <>
-        <Typography variant="h6">Condições do Produto</Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {condicoes.map((condicao) => (
-            <FormControlLabel
-              key={condicao}
-              control={
-                <Checkbox
-                  checked={condicoesSelecionadas.includes(condicao)}
-                  onChange={() => toggleCondicao(condicao)}
-                  name={condicao}
-                />
-              }
-              label={condicao}
-            />
-          ))}
-        </Box>
+          {/* Exibir campos de condições, observações e imagem apenas para ações de "entregar" ou "receber" */}
+          {(modalType === 'entregar' || modalType === 'receber' || modalType === 'negar' || modalType === 'devolver') && (
+            <>
+              <Typography variant="h6">Condições do Produto</Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {condicoes.map((condicao) => (
+                  <FormControlLabel
+                    key={condicao}
+                    control={
+                      <Checkbox
+                        checked={condicoesSelecionadas.includes(condicao)}
+                        onChange={() => toggleCondicao(condicao)}
+                        name={condicao}
+                      />
+                    }
+                    label={condicao}
+                  />
+                ))}
+              </Box>
 
-        {/* Observações */}
-        <TextField
-          fullWidth
-          label="Observações"
-          value={observacoes}
-          onChange={(e) => setObservacoes(e.target.value)}
-          margin="normal"
-          multiline
-          rows={4}
-        />
+              {/* Observações */}
+              <TextField
+                fullWidth
+                label="Observações"
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+                margin="normal"
+                multiline
+                rows={4}
+              />
 
-        {/* Imagem */}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImagem(e.target.files ? e.target.files[0] : null)}
-          style={{ marginTop: 10 }}
-        />
-      </>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setOpenModal(false)} color="secondary">Cancelar</Button>
-    <Button
-      onClick={() => {
-        if (modalType === 'entregar') registrarEntrega();
-        if (modalType === 'receber') registrarRecebimento();
-        if (modalType === 'negar') registrarNegacao();
-        if (modalType === 'devolver') registrarDevolucao();
-      }}
-      color="primary"
-    >
-      Confirmar
-    </Button>
-  </DialogActions>
-</Dialog>
+              {/* Imagem */}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImagem(e.target.files ? e.target.files[0] : null)}
+                style={{ marginTop: 10 }}
+              />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModal(false)} color="secondary">Cancelar</Button>
+          <Button
+            onClick={() => {
+              if (modalType === 'Entregar') registrarEntrega();
+              if (modalType === 'Receber') registrarRecebimento();
+              if (modalType === 'Negar') registrarNegacao();
+              if (modalType === 'Devolver') registrarDevolucao();
+            }}
+            color="primary"
+          >
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Exibindo erro se ocorrer algum problema */}
       <Snackbar

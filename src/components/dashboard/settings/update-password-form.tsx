@@ -20,23 +20,23 @@ export function UpdatePasswordForm(): React.JSX.Element {
       }}
     >
       <Card>
-        <CardHeader subheader="Update password" title="Password" />
+        <CardHeader subheader="Atualizar senha" title="Senha" />
         <Divider />
         <CardContent>
           <Stack spacing={3} sx={{ maxWidth: 'sm' }}>
             <FormControl fullWidth>
-              <InputLabel>Password</InputLabel>
-              <OutlinedInput label="Password" name="password" type="password" />
+              <InputLabel>Senha</InputLabel>
+              <OutlinedInput label="Senha" name="password" type="password" />
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel>Confirm password</InputLabel>
-              <OutlinedInput label="Confirm password" name="confirmPassword" type="password" />
+              <InputLabel>Confirmar senha</InputLabel>
+              <OutlinedInput label="Confirmar senha" name="confirmPassword" type="password" />
             </FormControl>
           </Stack>
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">Update</Button>
+          <Button variant="contained">Atualizar</Button>
         </CardActions>
       </Card>
     </form>
