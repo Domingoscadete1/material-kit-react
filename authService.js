@@ -1,5 +1,5 @@
 // authService.js
-import  jwtDecode  from 'jwt-decode';
+import  {jwtDecode}  from 'jwt-decode';
 import Config from './Config';
 
 const baseUrl = Config.getApiUrl().endsWith('/') ? Config.getApiUrl() : `${Config.getApiUrl()}/`;

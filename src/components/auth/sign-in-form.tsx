@@ -21,7 +21,7 @@ import { jwtDecode } from 'jwt-decode';
 import { paths } from '@/paths';
 import { authClient } from '@/lib/auth/client';
 import { useUser } from '@/hooks/use-user';
-import Config from '../Config';
+import Config from '../../../Config';
 import axios from 'axios';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -179,7 +179,7 @@ export function SignInForm(): React.JSX.Element {
     console.log("Iniciando requisição para buscar dados do usuário...");
   
     try {
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/user/`, {
+      const response = await axios.get(`${baseUrl}api/user/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           "ngrok-skip-browser-warning": "true",
