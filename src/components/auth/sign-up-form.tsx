@@ -75,9 +75,9 @@ export function SignUpForm(): React.JSX.Element {
       <Stack spacing={1}>
         <Typography variant="h4">Sign up</Typography>
         <Typography color="text.secondary" variant="body2">
-          Already have an account?{' '}
+          Já tem uma conta?{' '}
           <Link component={RouterLink} href={paths.auth.signIn} underline="hover" variant="subtitle2">
-            Sign in
+            Login
           </Link>
         </Typography>
       </Stack>

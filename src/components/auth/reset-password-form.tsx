@@ -14,10 +14,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import Config from '../../../config'; 
+import Config from '../../../config';
 
-const schema = zod.object({ 
-  email: zod.string().min(1, { message: 'Email is required' }).email() 
+const schema = zod.object({
+  email: zod.string().min(1, { message: 'Email is required' }).email()
 });
 
 type Values = zod.infer<typeof schema>;
@@ -41,16 +41,16 @@ export function ResetPasswordForm(): React.JSX.Element {
     async (values: Values): Promise<void> => {
       setIsPending(true);
       setSuccessMessage('');
-      
+
       try {
         const response = await axios.post(
           `${baseUrl}api/password-reset/`,
           { email: values.email },
-          { 
-            headers: { 
+          {
+            headers: {
               'Content-Type': 'application/json',
-              "ngrok-skip-browser-warning": "true" 
-            } 
+              "ngrok-skip-browser-warning": "true"
+            }
           }
         );
 
@@ -59,16 +59,16 @@ export function ResetPasswordForm(): React.JSX.Element {
           // Opcional: redirecionar após alguns segundos
           // setTimeout(() => router.push('/login'), 3000);
         } else {
-          setError('root', { 
-            type: 'server', 
-            message: response.data.error || 'Failed to send reset link' 
+          setError('root', {
+            type: 'server',
+            message: response.data.error || 'Failed to send reset link'
           });
         }
       } catch (error: any) {
         console.error('Reset password error:', error);
-        setError('root', { 
-          type: 'server', 
-          message: error.response?.data?.error || 'An error occurred. Please try again.' 
+        setError('root', {
+          type: 'server',
+          message: error.response?.data?.error || 'An error occurred. Please try again.'
         });
       } finally {
         setIsPending(false);
@@ -79,11 +79,11 @@ export function ResetPasswordForm(): React.JSX.Element {
 
   return (
     <Stack spacing={4}>
-      <Typography variant="h5">Reset password</Typography>
+      <Typography variant="h5">Redefinir Senha</Typography>
       <Typography variant="body1" color="text.secondary">
-        Enter your email address and we'll send you a link to reset your password.
+        Digite seu endereço de e-mail e lhe enviaremos um link para redefinir sua senha.
       </Typography>
-      
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={3}>
           <Controller
@@ -91,29 +91,29 @@ export function ResetPasswordForm(): React.JSX.Element {
             name="email"
             render={({ field }) => (
               <FormControl error={Boolean(errors.email)} fullWidth>
-                <InputLabel>Email address</InputLabel>
+                <InputLabel>Email</InputLabel>
                 <OutlinedInput {...field} label="Email address" type="email" />
                 {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
               </FormControl>
             )}
           />
-          
+
           {errors.root ? (
             <Alert severity="error">{errors.root.message}</Alert>
           ) : null}
-          
+
           {successMessage ? (
             <Alert severity="success">{successMessage}</Alert>
           ) : null}
-          
-          <Button 
-            disabled={isPending} 
-            type="submit" 
-            variant="contained" 
+
+          <Button
+            disabled={isPending}
+            type="submit"
+            variant="contained"
             size="large"
             fullWidth
           >
-            {isPending ? 'Sending...' : 'Send recovery link'}
+            {isPending ? 'Enviando...' : 'Enviar Link'}
           </Button>
         </Stack>
       </form>

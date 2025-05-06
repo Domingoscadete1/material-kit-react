@@ -25,14 +25,14 @@ const states = [
 export function AccountDetailsForm(): React.JSX.Element {
   const [userData, setUserData] = React.useState<[]>([]);  // Estado para armazenar lances
   const baseUrl = Config.getApiUrl();
-  const mediaUrl=Config.getApiUrlMedia();
+  const mediaUrl = Config.getApiUrlMedia();
 
   React.useEffect(() => {
     const token = localStorage.getItem('userData');
     if (token) {
       const userData = JSON.parse(token);
       setUserData(userData);
-      
+
     }
   }, []);
   return (
@@ -48,32 +48,26 @@ export function AccountDetailsForm(): React.JSX.Element {
           <Grid container spacing={3}>
             <Grid md={6} xs={12}>
               <FormControl fullWidth required>
-                <InputLabel>Primeiro Nome</InputLabel>
-                <OutlinedInput defaultValue={userData.nome} label="First name" name="firstName" disabled/>
+                <InputLabel>Nome</InputLabel>
+                <OutlinedInput defaultValue={userData.nome} label="First name" name="firstName" disabled />
               </FormControl>
             </Grid>
-            {/* <Grid md={6} xs={12}>
-              <FormControl fullWidth required>
-                <InputLabel>Último Nome</InputLabel>
-                <OutlinedInput defaultValue={userData.nome}label="Last name" name="lastName" disabled/>
-              </FormControl>
-            </Grid> */}
             <Grid md={6} xs={12}>
               <FormControl fullWidth required>
                 <InputLabel>Email</InputLabel>
-                <OutlinedInput defaultValue={userData.email} label="Email address" name="email" disabled/>
+                <OutlinedInput defaultValue={userData.email} label="Email address" name="email" disabled />
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
               <FormControl fullWidth>
-                <InputLabel>Número de Telefone</InputLabel>
-                <OutlinedInput label="Phone number" defaultValue={userData.numero_telefone}name="phone" type="tel" disabled />
+                <InputLabel>Telefone</InputLabel>
+                <OutlinedInput label="Phone number" defaultValue={userData.numero_telefone} name="phone" type="tel" disabled />
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Endereço</InputLabel>
-                <OutlinedInput defaultValue={userData.endereco} label="Email address" name="state" disabled/>
+                <OutlinedInput defaultValue={userData.endereco} label="Email address" name="state" disabled />
               </FormControl>
             </Grid>
           </Grid>

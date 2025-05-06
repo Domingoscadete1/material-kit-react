@@ -31,7 +31,7 @@ import TextField from '@mui/material/TextField';
 
 
 const schema = zod.object({
-  username: zod.string().min(1, { message: 'Username is required' }), 
+  username: zod.string().min(1, { message: 'Username is required' }),
   password: zod.string().min(1, { message: 'Password is required' }),
 });
 interface UserData {
@@ -67,13 +67,13 @@ export function SignInForm(): React.JSX.Element {
     setError,
     formState: { errors },
   } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
-  
+
   React.useEffect(() => {
     const fetchUserData = async () => {
       try {
         const storedUserData = await localStorage.getItem('userData');
 
-        
+
       } catch (error) {
         console.error('Erro ao recuperar dados:', error);
 
@@ -125,7 +125,7 @@ export function SignInForm(): React.JSX.Element {
   const onSubmit = React.useCallback(
     async (values: Values): Promise<void> => {
       setIsPending(true);
-  
+
       try {
         const response = await axios.post(
           `${baseUrl}api/token/`,
@@ -140,28 +140,28 @@ export function SignInForm(): React.JSX.Element {
             },
           }
         );
-  
+
         console.log('Response Status:', response.status);
-  
+
         if (response.status !== 200) {
           console.error('Erro da API:', response.data);
           setError('root', { type: 'server', message: response.data.detail || 'Erro no login.' });
           return;
         }
-  
+
         const data = response.data;
         console.log('Resposta da API login:', data);
-  
+
         const decodedToken = jwtDecode(data.access);
         console.log('Token decodificado:', decodedToken);
-  
+
         if (decodedToken.is_funcionario_posto) {
           await fetchUserData(data.access);
           localStorage.setItem('accessToken', data.access);
           localStorage.setItem('refreshToken', data.refresh);
           localStorage.setItem('custom-auth-token', data.access);
           await checkSession?.();
-          
+
         } else {
           setError('root', { type: 'server', message: 'Usuário não autorizado.' });
         }
@@ -174,10 +174,10 @@ export function SignInForm(): React.JSX.Element {
     },
     [checkSession, router, setError]
   );
-  
+
   const fetchUserData = async (token: string) => {
     console.log("Iniciando requisição para buscar dados do usuário...");
-  
+
     try {
       const response = await axios.get(`${baseUrl}api/user/`, {
         headers: {
@@ -185,22 +185,22 @@ export function SignInForm(): React.JSX.Element {
           "ngrok-skip-browser-warning": "true",
         },
       });
-  
+
       // Verifique se a resposta da API é válida e contém os dados esperados
       if (response.status === 200 && response.data) {
         console.log("Resposta da requisição:", response);
         const data = response.data;
         console.log('Dados do usuário:', data);
-  
+
         // Armazena os dados do usuário no estado
         setUserData(data);
-  
+
         // Armazena os dados no localStorage
         await localStorage.setItem('userData', JSON.stringify(data));
       } else {
         console.error('Resposta da API inesperada:', response);
       }
-  
+
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Erro na requisição axios:', error.response?.data || error.message);
@@ -213,11 +213,11 @@ export function SignInForm(): React.JSX.Element {
   return (
     <Stack spacing={4}>
       <Stack spacing={1}>
-        <Typography variant="h4">Sign in</Typography>
+        <Typography variant="h4">Login</Typography>
       </Stack>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
-        <Controller
+          <Controller
             control={control}
             name="username" // Alterado para 'username'
             render={({ field }) => (
@@ -233,7 +233,7 @@ export function SignInForm(): React.JSX.Element {
             name="password"
             render={({ field }) => (
               <FormControl error={Boolean(errors.password)}>
-                <InputLabel>Password</InputLabel>
+                <InputLabel>Senha</InputLabel>
                 <OutlinedInput
                   {...field}
                   endAdornment={
@@ -260,36 +260,36 @@ export function SignInForm(): React.JSX.Element {
           />
           <div>
             <Link component={RouterLink} href={paths.auth.resetPassword} variant="subtitle2">
-              Forgot password?
+              Esqueceu a senha?
             </Link>
           </div>
           {errors.root && <Alert color="error">{errors.root.message}</Alert>}
           <Button disabled={isPending} type="submit" variant="contained">
-            {isPending ? 'Signing in...' : 'Sign in'}
+            {isPending ? 'Logando...' : 'Login'}
           </Button>
         </Stack>
       </form>
 
-       {/* Password Reset Dialog */}
-       <Dialog open={openResetDialog} onClose={handleCloseResetDialog}>
-        <DialogTitle>Reset Password</DialogTitle>
+      {/* Password Reset Dialog */}
+      <Dialog open={openResetDialog} onClose={handleCloseResetDialog}>
+        <DialogTitle>Redefinir senha</DialogTitle>
         <DialogContent>
           <Typography variant="body1" sx={{ mb: 2 }}>
-            Enter your email address to receive a password reset link
+            Digite seu endereço de e-mail para receber um link para redefinir sua senha
           </Typography>
-          
+
           {resetError && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {resetError}
             </Alert>
           )}
-          
+
           {resetMessage && (
             <Alert severity="success" sx={{ mb: 2 }}>
               {resetMessage}
             </Alert>
           )}
-          
+
           <TextField
             fullWidth
             margin="normal"
@@ -302,12 +302,12 @@ export function SignInForm(): React.JSX.Element {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseResetDialog} disabled={resetLoading}>
-            Cancel
+            Cancelar
           </Button>
-          <Button 
-            onClick={handleResetPassword} 
-            variant="contained" 
-            color="primary" 
+          <Button
+            onClick={handleResetPassword}
+            variant="contained"
+            color="primary"
             disabled={resetLoading}
           >
             {resetLoading ? 'Sending...' : 'Send Link'}

@@ -303,6 +303,7 @@ export function CustomersTable({
               <TableCell>Preço</TableCell>
               <TableCell>Data</TableCell>
               <TableCell>Descrição</TableCell>
+              <TableCell>Ações</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
