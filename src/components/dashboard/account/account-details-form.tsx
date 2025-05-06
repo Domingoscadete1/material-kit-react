@@ -52,12 +52,12 @@ export function AccountDetailsForm(): React.JSX.Element {
                 <OutlinedInput defaultValue={userData.nome} label="First name" name="firstName" disabled/>
               </FormControl>
             </Grid>
-            <Grid md={6} xs={12}>
+            {/* <Grid md={6} xs={12}>
               <FormControl fullWidth required>
                 <InputLabel>Último Nome</InputLabel>
                 <OutlinedInput defaultValue={userData.nome}label="Last name" name="lastName" disabled/>
               </FormControl>
-            </Grid>
+            </Grid> */}
             <Grid md={6} xs={12}>
               <FormControl fullWidth required>
                 <InputLabel>Email</InputLabel>
@@ -73,13 +73,7 @@ export function AccountDetailsForm(): React.JSX.Element {
             <Grid md={6} xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Endereço</InputLabel>
-                <Select defaultValue={userData.endereco} label="State" name="state" variant="outlined" disabled>
-                  {states.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
+                <OutlinedInput defaultValue={userData.endereco} label="Email address" name="state" disabled/>
               </FormControl>
             </Grid>
           </Grid>
