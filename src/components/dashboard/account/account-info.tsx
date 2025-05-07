@@ -9,21 +9,18 @@ import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Config from '@/components/Config';
+import Config from '../../../../Config';
+import { fetchWithToken } from '../../../../authService';
 
-const user = {
-  name: 'Sofia Rivers',
-  avatar: '/assets/avatar.png',
-  jobTitle: 'Senior Developer',
-  country: 'USA',
-  city: 'Los Angeles',
-  timezone: 'GTM-7',
-} as const;
+
+
 
 export function AccountInfo(): React.JSX.Element {
   const baseUrl = Config.getApiUrl();
   const mediaUrl=Config.getApiUrlMedia();
-  const [userData, setUserData] = React.useState<[]>([]);  
+  const [userData, setUserData] = React.useState<any>(null);
+  const [funcionario, setFuncionario] = React.useState<[]>([]);  
+
 
   React.useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -33,18 +30,40 @@ export function AccountInfo(): React.JSX.Element {
       
     }
   }, []);
+  
+  React.useEffect(() => {
+    const fetchFuncionario = async () => {
+      if (!userData?.id) return; // Evita chamar com id indefinido
+
+    try {
+      const response = await fetchWithToken(`api/funcionario/${userData.id}/`, {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+
+      const data = await response.json();
+      console.log(data);
+      setFuncionario(data);
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+    }
+  };
+    fetchFuncionario();
+  }, [userData]); 
 
   return (
     <Card>
       <CardContent>
         <Stack spacing={2} sx={{ alignItems: 'center' }}>
           <div>
-            <Avatar src={`${mediaUrl}${userData.foto}`} sx={{ height: '80px', width: '80px' }} />
+            <Avatar src={funcionario?.foto} sx={{ height: '80px', width: '80px' }} />
           </div>
           <Stack spacing={1} sx={{ textAlign: 'center' }}>
-            <Typography variant="h5">{userData.nome}</Typography>
+            <Typography variant="h5">{funcionario?.nome}</Typography>
             <Typography color="text.secondary" variant="body2">
-              {userData.endereco} 
+              {funcionario?.endereco} 
             </Typography>
           </Stack>
         </Stack>
