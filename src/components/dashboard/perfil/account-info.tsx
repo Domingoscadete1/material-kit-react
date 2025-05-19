@@ -12,9 +12,6 @@ import Typography from '@mui/material/Typography';
 import Config from '../../../../Config';
 import { fetchWithToken } from '../../../../authService';
 
-
-
-
 export function AccountInfo(): React.JSX.Element {
   const baseUrl = Config.getApiUrl();
   const mediaUrl=Config.getApiUrlMedia();

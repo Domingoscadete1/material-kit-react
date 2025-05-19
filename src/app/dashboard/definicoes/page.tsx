@@ -4,9 +4,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { config } from '@/config';
-import { UpdatePasswordForm } from '@/components/dashboard/settings/update-password-form';
+import { UpdatePasswordForm } from '@/components/dashboard/definicoes/update-password-form';
 
-export const metadata = { title: `Settings | Dashboard | ${config.site.name}` } satisfies Metadata;
+export const metadata = { title: ` ${config.site.name}` } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
   return (

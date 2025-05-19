@@ -5,10 +5,10 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 
 import { config } from '@/config';
-import { AccountDetailsForm } from '@/components/dashboard/account/account-details-form';
-import { AccountInfo } from '@/components/dashboard/account/account-info';
+import { AccountDetailsForm } from '@/components/dashboard/perfil/account-details-form';
+import { AccountInfo } from '@/components/dashboard/perfil/account-info';
 
-export const metadata = { title: `Account | Dashboard | ${config.site.name}` } satisfies Metadata;
+export const metadata = { title: ` ${config.site.name}` } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
   return (
