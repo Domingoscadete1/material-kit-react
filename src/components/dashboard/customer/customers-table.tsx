@@ -147,13 +147,9 @@ export function CustomersTable({
     formData.append('observacoes', observacoes);
 
     if (imagem) {
-      formData.append('imagem', {
-        uri: imagem,
-        name: 'produto.jpg',
-        type: 'image/jpeg',
-      } as any);
+      formData.append('imagem', imagem); // Apenas envie o File diretamente
     }
-
+    
     try {
       const res = await fetchWithToken(url, {
         method: 'POST',
@@ -213,7 +209,10 @@ export function CustomersTable({
 
   // Função para registrar recebimento
   const registrarRecebimento = async () => {
-    const url = `api/posto/receber-produto/`;
+    console.log('Tentando registrar recebimento');
+
+    const url = 'api/posto/receber-produto/';
+    console.log(url);
     await enviarRegistroProduto(url);
   };
   const registrarNegacao = async () => {
@@ -500,10 +499,10 @@ export function CustomersTable({
           <Button onClick={() => setOpenModal(false)} color="secondary">Cancelar</Button>
           <Button
             onClick={() => {
-              if (modalType === 'Entregar') registrarEntrega();
-              if (modalType === 'Receber') registrarRecebimento();
-              if (modalType === 'Negar') registrarNegacao();
-              if (modalType === 'Devolver') registrarDevolucao();
+              if (modalType === 'entregar') registrarEntrega();
+              if (modalType === 'receber') registrarRecebimento();
+              if (modalType === 'negar') registrarNegacao();
+              if (modalType === 'devolver') registrarDevolucao();
             }}
             color="primary"
           >
