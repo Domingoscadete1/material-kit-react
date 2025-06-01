@@ -317,6 +317,11 @@ export function CustomersTable({
             {filteredLances.map((lance) => (
               <TableRow hover key={lance.id}>
                 <TableCell>{lance.id}</TableCell>
+                <TableCell><img
+                    src={`${mediaUrl}${lance?.produto?.imagens[0]?.imagem}`}  // Aqui usamos o caminho correto da imagem
+                    alt="Imagem do Produto"
+                    style={{ maxWidth: '100%', marginTop: '10px' }}
+                  /></TableCell>
                 <TableCell><Button onClick={() => handleOpenModalProduct('entregar', lance.id, lance.produto)}>
                   {lance.produto.nome}
                 </Button></TableCell>
