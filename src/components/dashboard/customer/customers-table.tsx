@@ -62,6 +62,8 @@ export function CustomersTable({
   const mediaUrl = Config.getApiUrlMedia();
 
   const [openModal, setOpenModal] = React.useState(false);
+  const [openModalProduct, setOpenModalProduct] = React.useState(false);
+
   const [modalType, setModalType] = React.useState<'Entregar' | 'Receber' | 'Negar' | 'Devolver'>('Entregar');
   // 'entregar', 'receber', 'negar' ou 'devolver'
 
@@ -187,6 +189,12 @@ export function CustomersTable({
     setProdutoInfo(produto);  // Armazenar as informações do produto no estado
     setOpenModal(true);  // Abre o modal
   };
+  const handleOpenModalProduct = (type: 'entregar' | 'receber', lanceId: string, produto: any) => {
+    setModalType(type);
+    setLanceId(lanceId);
+    setProdutoInfo(produto);  // Armazenar as informações do produto no estado
+    setOpenModalProduct(true);  // Abre o modal
+  };
   const gerarFaturaPosto = async (registroId) => {
     try {
       const apiUrl = `${baseUrl}api/registro-posto/${registroId}/`;
@@ -309,7 +317,7 @@ export function CustomersTable({
             {filteredLances.map((lance) => (
               <TableRow hover key={lance.id}>
                 <TableCell>{lance.id}</TableCell>
-                <TableCell><Button onClick={() => handleOpenModal('entregar', lance.id, lance.produto)}>
+                <TableCell><Button onClick={() => handleOpenModalProduct('entregar', lance.id, lance.produto)}>
                   {lance.produto.nome}
                 </Button></TableCell>
                 <TableCell>{lance.posto.nome}</TableCell>
@@ -433,26 +441,7 @@ export function CustomersTable({
         </DialogTitle>
         <DialogContent>
           {/* Exibir as informações do produto */}
-          {produtoInfo && (
-            <Box>
-              <Typography variant="h6">Produto: {produtoInfo.nome}</Typography>
-              <Typography variant="body1">Descrição: {produtoInfo.descricao}</Typography>
-              <Typography variant="body1">Preço: {produtoInfo.preco}</Typography>
-              <Divider sx={{ my: 2 }} />
 
-              {/* Exibir imagens do produto usando a URL da mídia */}
-              {produtoInfo.imagens && produtoInfo.imagens.length > 0 && (
-                <Box sx={{ my: 2 }}>
-                  <Typography variant="body1">Imagens do Produto:</Typography>
-                  <img
-                    src={`${mediaUrl}${produtoInfo.imagens[0].imagem}`}  // Aqui usamos o caminho correto da imagem
-                    alt="Imagem do Produto"
-                    style={{ maxWidth: '100%', marginTop: '10px' }}
-                  />
-                </Box>
-              )}
-            </Box>
-          )}
 
           {/* Exibir campos de condições, observações e imagem apenas para ações de "entregar" ou "receber" */}
           {(modalType === 'entregar' || modalType === 'receber' || modalType === 'negar' || modalType === 'devolver') && (
@@ -509,6 +498,37 @@ export function CustomersTable({
             Confirmar
           </Button>
         </DialogActions>
+      </Dialog>
+
+
+      <Dialog open={openModalProduct} onClose={() => setOpenModalProduct(false)} fullWidth maxWidth="sm">
+        
+        <DialogContent>
+          {produtoInfo && (
+            <Box>
+              <Typography variant="h6">Produto: {produtoInfo.nome}</Typography>
+              <Typography variant="body1">Descrição: {produtoInfo.descricao}</Typography>
+              <Typography variant="body1">Preço: {produtoInfo.preco}</Typography>
+              <Divider sx={{ my: 2 }} />
+
+              {/* Exibir imagens do produto usando a URL da mídia */}
+              {produtoInfo.imagens && produtoInfo.imagens.length > 0 && (
+                <Box sx={{ my: 2 }}>
+                  <Typography variant="body1">Imagens do Produto:</Typography>
+                  <img
+                    src={`${mediaUrl}${produtoInfo.imagens[0].imagem}`}  // Aqui usamos o caminho correto da imagem
+                    alt="Imagem do Produto"
+                    style={{ maxWidth: '100%', marginTop: '10px' }}
+                  />
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Exibir campos de condições, observações e imagem apenas para ações de "entregar" ou "receber" */}
+          
+        </DialogContent>
+        
       </Dialog>
 
       {/* Exibindo erro se ocorrer algum problema */}
