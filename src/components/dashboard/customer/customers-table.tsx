@@ -57,6 +57,7 @@ export function CustomersTable({
   const [observacoes, setObservacoes] = React.useState<string>('');
   const [imagem, setImagem] = React.useState<File | null>(null);
   const [produtoInfo, setProdutoInfo] = React.useState<any>(null);
+  const [selectedImage, setSelectedImage] = React.useState(null);
 
   const baseUrl = Config.getApiUrl();
   const mediaUrl = Config.getApiUrlMedia();
@@ -151,7 +152,7 @@ export function CustomersTable({
     if (imagem) {
       formData.append('imagem', imagem); // Apenas envie o File diretamente
     }
-    
+
     try {
       const res = await fetchWithToken(url, {
         method: 'POST',
@@ -303,6 +304,7 @@ export function CustomersTable({
           <TableHead>
             <TableRow>
               <TableCell>Lance</TableCell>
+              <TableCell>Imagem</TableCell>
               <TableCell>Produto</TableCell>
               <TableCell>Posto</TableCell>
               <TableCell>Status</TableCell>
@@ -317,14 +319,24 @@ export function CustomersTable({
             {filteredLances.map((lance) => (
               <TableRow hover key={lance.id}>
                 <TableCell>{lance.id}</TableCell>
-                <TableCell><img
-                    src={`${mediaUrl}${lance?.produto?.imagens[0]?.imagem}`}  // Aqui usamos o caminho correto da imagem
+                <TableCell>
+                  <img
+                    src={`${mediaUrl}${lance?.produto?.imagens[0]?.imagem}`}
                     alt="Imagem do Produto"
-                    style={{ maxWidth: '100%', marginTop: '10px' }}
-                  /></TableCell>
-                <TableCell><Button onClick={() => handleOpenModalProduct('entregar', lance.id, lance.produto)}>
-                  {lance.produto.nome}
-                </Button></TableCell>
+                    style={{
+                      width: '50px',
+                      height: '50px',
+                      objectFit: 'cover',
+                      borderRadius: '8px',
+                      marginTop: '10px'
+                    }}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Button onClick={() => handleOpenModalProduct('entregar', lance.id, lance.produto)}>
+                    {lance.produto.nome}
+                  </Button>
+                </TableCell>
                 <TableCell>{lance.posto.nome}</TableCell>
                 <TableCell>{lance.status_pos_pagamento}</TableCell>
                 <TableCell>{lance.quantidade}</TableCell>
@@ -412,16 +424,6 @@ export function CustomersTable({
           </TableBody>
         </Table>
       </Box>
-      <Divider />
-      <TablePagination
-        component="div"
-        count={count}
-        onPageChange={noop}
-        onRowsPerPageChange={noop}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-      />
 
       {/* Exibindo erros usando Snackbar */}
       {error && (
@@ -446,8 +448,6 @@ export function CustomersTable({
         </DialogTitle>
         <DialogContent>
           {/* Exibir as informações do produto */}
-
-
           {/* Exibir campos de condições, observações e imagem apenas para ações de "entregar" ou "receber" */}
           {(modalType === 'entregar' || modalType === 'receber' || modalType === 'negar' || modalType === 'devolver') && (
             <>
@@ -505,9 +505,12 @@ export function CustomersTable({
         </DialogActions>
       </Dialog>
 
-
-      <Dialog open={openModalProduct} onClose={() => setOpenModalProduct(false)} fullWidth maxWidth="sm">
-        
+      <Dialog
+        open={openModalProduct}
+        onClose={() => setOpenModalProduct(false)}
+        fullWidth
+        maxWidth="md"
+      >
         <DialogContent>
           {produtoInfo && (
             <Box>
@@ -516,24 +519,77 @@ export function CustomersTable({
               <Typography variant="body1">Preço: {produtoInfo.preco}</Typography>
               <Divider sx={{ my: 2 }} />
 
-              {/* Exibir imagens do produto usando a URL da mídia */}
               {produtoInfo.imagens && produtoInfo.imagens.length > 0 && (
                 <Box sx={{ my: 2 }}>
                   <Typography variant="body1">Imagens do Produto:</Typography>
-                  <img
-                    src={`${mediaUrl}${produtoInfo.imagens[0].imagem}`}  // Aqui usamos o caminho correto da imagem
-                    alt="Imagem do Produto"
-                    style={{ maxWidth: '100%', marginTop: '10px' }}
-                  />
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 2,
+                      mt: 2,
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {produtoInfo.imagens.map((imagem, index) => (
+                      <img
+                        key={index}
+                        src={`${mediaUrl}${imagem.imagem}`}
+                        alt={`Imagem ${index + 1} do Produto`}
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '270px',
+                          borderRadius: '8px',
+                          objectFit: 'cover',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setSelectedImage(imagem)}
+                      />
+                    ))}
+                  </Box>
                 </Box>
               )}
             </Box>
           )}
-
-          {/* Exibir campos de condições, observações e imagem apenas para ações de "entregar" ou "receber" */}
-          
         </DialogContent>
-        
+      </Dialog>
+
+      <Dialog
+        open={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        maxWidth="sm"
+        fullWidth
+        sx={{
+          "& .MuiPaper-root": {
+            backgroundColor: "transparent",
+            boxShadow: "none",
+          },
+        }}
+      >
+        <DialogContent>
+          {selectedImage && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <img
+                src={`${mediaUrl}${selectedImage.imagem}`}
+                alt="Imagem ampliada do Produto"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "80vh",
+                  borderRadius: "8px",
+                  objectFit: "contain",
+                  boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.2)",
+                }}
+              />
+            </Box>
+          )}
+        </DialogContent>
       </Dialog>
 
       {/* Exibindo erro se ocorrer algum problema */}
