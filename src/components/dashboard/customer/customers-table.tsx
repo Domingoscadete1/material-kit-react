@@ -306,7 +306,7 @@ export function CustomersTable({
               <TableCell>Lance</TableCell>
               <TableCell>Imagem</TableCell>
               <TableCell>Produto</TableCell>
-              <TableCell>Posto</TableCell>
+              <TableCell>Gaveta</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Quantidade</TableCell>
               <TableCell>Preço</TableCell>
@@ -337,7 +337,7 @@ export function CustomersTable({
                     {lance.produto.nome}
                   </Button>
                 </TableCell>
-                <TableCell>{lance.posto.nome}</TableCell>
+                <TableCell>{lance.numero_gaveta}</TableCell>
                 <TableCell>{lance.status_pos_pagamento}</TableCell>
                 <TableCell>{lance.quantidade}</TableCell>
                 <TableCell>{lance.preco}</TableCell>
