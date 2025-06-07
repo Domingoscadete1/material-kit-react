@@ -511,16 +511,40 @@ export function CustomersTable({
         fullWidth
         maxWidth="md"
       >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <img
+              src="https://i1.sndcdn.com/artworks-XesNnyIwzKt1jGVh-4cyTzw-t500x500.jpg"
+              alt="Foto do Vendedor"
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                objectFit: 'cover'
+              }}
+            />
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                Délcio Paiva
+              </Typography>
+              <Typography variant="subtitle2">
+                Vendedor
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+
+        <Divider/>
+
         <DialogContent>
           {produtoInfo && (
             <Box>
-              <Typography variant="h6">Produto: {produtoInfo.nome}</Typography>
+              <Typography variant="h6">Produto: {produtoInfo?.nome}</Typography>
               <Typography variant="body1">Descrição: {produtoInfo.descricao}</Typography>
               <Typography variant="body1">Preço: {produtoInfo.preco}</Typography>
-              <Divider sx={{ my: 2 }} />
 
               {produtoInfo.imagens && produtoInfo.imagens.length > 0 && (
-                <Box sx={{ my: 2 }}>
+                <Box>
                   <Typography variant="body1">Imagens do Produto:</Typography>
                   <Box
                     sx={{
