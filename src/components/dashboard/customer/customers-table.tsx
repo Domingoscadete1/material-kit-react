@@ -58,6 +58,11 @@ export function CustomersTable({
   const [imagem, setImagem] = React.useState<File | null>(null);
   const [produtoInfo, setProdutoInfo] = React.useState<any>(null);
   const [selectedImage, setSelectedImage] = React.useState(null);
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 1,
+    pageSize: 10,
+    totalPages: 1,
+  });
 
   const baseUrl = Config.getApiUrl();
   const mediaUrl = Config.getApiUrlMedia();
@@ -74,7 +79,7 @@ export function CustomersTable({
   const fetchLances = async (postoId: string) => {
     setLoading(true);
     try {
-      const response = await fetchWithToken(`api/posto/${postoId}/lances/`, {
+      const response = await fetchWithToken(`api/posto/${postoId}/lances/?page=${pagination.pageIndex}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -82,8 +87,12 @@ export function CustomersTable({
         },
       });  // Fazendo requisição à API
       const data = await response.json();
-      setLances(data.lances);  // Armazena os lances no estado
-      console.log(data.lances);
+      setLances(data.results);  // Armazena os lances no estado
+      console.log(data.results);
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: Math.ceil(data.count / prev.pageSize),
+      }));
     } catch (error) {
       console.error('Erro ao buscar os lances:', error);
       setError('Erro ao carregar os lances, tente novamente mais tarde.'); // Exibe o erro na interface
@@ -114,7 +123,7 @@ export function CustomersTable({
         fetchLances(postoId);
       }
     }
-  }, []);
+  }, [pagination.pageIndex]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -311,7 +320,7 @@ export function CustomersTable({
               <TableCell>Quantidade</TableCell>
               <TableCell>Preço</TableCell>
               <TableCell>Data</TableCell>
-              <TableCell>Descrição</TableCell>
+              <TableCell>Comprador</TableCell>
               <TableCell>Ações</TableCell>
             </TableRow>
           </TableHead>
@@ -321,6 +330,7 @@ export function CustomersTable({
                 <TableCell>{lance.id}</TableCell>
                 <TableCell>
                   <img
+                  onClick={() => handleOpenModalProduct('entregar', lance.id, lance.produto)}
                     src={`${mediaUrl}${lance?.produto?.imagens[0]?.imagem}`}
                     alt="Imagem do Produto"
                     style={{
@@ -329,7 +339,8 @@ export function CustomersTable({
                       objectFit: 'cover',
                       borderRadius: '8px',
                       marginTop: '10px'
-                    }}
+                    }
+                  }
                   />
                 </TableCell>
                 <TableCell>
@@ -342,7 +353,7 @@ export function CustomersTable({
                 <TableCell>{lance.quantidade}</TableCell>
                 <TableCell>{lance.preco}</TableCell>
                 <TableCell>{dayjs(lance.created_at).format('MMM D, YYYY')}</TableCell>
-                <TableCell>{lance.descricao}</TableCell>
+                <TableCell>{lance.usuario?.nome || lance.empresa_compradora?.nome}</TableCell>
                 <TableCell>
                   {lance.status_pos_pagamento
                     === "espera" && (
@@ -423,6 +434,43 @@ export function CustomersTable({
             ))}
           </TableBody>
         </Table>
+        {/* Paginação */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        gap: 2, 
+        p: 2,
+        mt: 2
+      }}>
+        <Button
+          variant="contained"
+          disabled={pagination.pageIndex === 1}
+          onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+          sx={{
+            opacity: pagination.pageIndex === 1 ? 0.5 : 1,
+            cursor: pagination.pageIndex === 1 ? 'not-allowed' : 'pointer'
+          }}
+        >
+          Anterior
+        </Button>
+        
+        <Typography variant="body1">
+          Página {pagination.pageIndex} de {pagination.totalPages}
+        </Typography>
+        
+        <Button
+          variant="contained"
+          disabled={pagination.pageIndex >= pagination.totalPages}
+          onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+          sx={{
+            opacity: pagination.pageIndex >= pagination.totalPages ? 0.5 : 1,
+            cursor: pagination.pageIndex >= pagination.totalPages ? 'not-allowed' : 'pointer'
+          }}
+        >
+          Próxima
+        </Button>
+      </Box>
       </Box>
 
       {/* Exibindo erros usando Snackbar */}
@@ -514,7 +562,7 @@ export function CustomersTable({
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img
-              src="https://i1.sndcdn.com/artworks-XesNnyIwzKt1jGVh-4cyTzw-t500x500.jpg"
+          src={`${mediaUrl}${produtoInfo?.usuario?.foto || produtoInfo?.empresa?.imagens[0]?.imagem}`}
               alt="Foto do Vendedor"
               style={{
                 width: 50,
@@ -525,7 +573,7 @@ export function CustomersTable({
             />
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                Délcio Paiva
+                {produtoInfo?.usuario?.nome || produtoInfo?.empresa?.nome}
               </Typography>
               <Typography variant="subtitle2">
                 Vendedor
@@ -541,7 +589,6 @@ export function CustomersTable({
             <Box>
               <Typography variant="h6">Produto: {produtoInfo?.nome}</Typography>
               <Typography variant="body1">Descrição: {produtoInfo.descricao}</Typography>
-              <Typography variant="body1">Preço: {produtoInfo.preco}</Typography>
 
               {produtoInfo.imagens && produtoInfo.imagens.length > 0 && (
                 <Box>
