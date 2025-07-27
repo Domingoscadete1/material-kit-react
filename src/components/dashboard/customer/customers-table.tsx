@@ -16,7 +16,7 @@ import axios from 'axios';  // Para consumir a API
 import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Snackbar, Alert } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Snackbar, Alert, CircularProgress } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Config from "../../../../Config";
@@ -69,7 +69,7 @@ export function CustomersTable({
 
   const [openModal, setOpenModal] = React.useState(false);
   const [openModalProduct, setOpenModalProduct] = React.useState(false);
-
+  const [isProcessing, setIsProcessing] = React.useState(false);
   const [modalType, setModalType] = React.useState<'Entregar' | 'Receber' | 'Negar' | 'Devolver'>('Entregar');
   // 'entregar', 'receber', 'negar' ou 'devolver'
 
@@ -136,6 +136,7 @@ export function CustomersTable({
 
   // Função base para envio dos dados
   const enviarRegistroProduto = async (url: string) => {
+    setIsProcessing(true);
     console.log('Enviando dados para a API...');
     console.log('Dados:', {
       postoId,
@@ -148,6 +149,7 @@ export function CustomersTable({
 
     if (!postoId || !funcionarioId || !lanceId || condicoesSelecionadas.length === 0) {
       alert("Por favor, preencha todos os campos obrigatórios");
+      setIsProcessing(false);
       return;
     }
 
@@ -159,14 +161,13 @@ export function CustomersTable({
     formData.append('observacoes', observacoes);
 
     if (imagem) {
-      formData.append('imagem', imagem); // Apenas envie o File diretamente
+      formData.append('imagem', imagem);
     }
 
     try {
       const res = await fetchWithToken(url, {
         method: 'POST',
         headers: {
-
           "ngrok-skip-browser-warning": "true",
         },
         body: formData
@@ -177,19 +178,22 @@ export function CustomersTable({
       if (res.status !== 200) {
         const errorResponse = await data;
         setError(errorResponse?.error || 'Erro desconhecido');
+        setIsProcessing(false);
         return;
       }
       const registro_id = data.registro.id;
-      gerarFaturaPosto(registro_id);
+      await gerarFaturaPosto(registro_id);
 
-      setOpenModal(false);  // Fecha o modal após sucesso
+      setOpenModal(false);
       alert('Registro realizado com sucesso!');
       window.location.reload();
 
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
-      setError('Erro ao enviar os dados, tente novamente mais tarde.'); // Exibe o erro na interface
+      setError('Erro ao enviar os dados, tente novamente mais tarde.');
       setOpenModal(false);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -199,12 +203,14 @@ export function CustomersTable({
     setProdutoInfo(produto);  // Armazenar as informações do produto no estado
     setOpenModal(true);  // Abre o modal
   };
+
   const handleOpenModalProduct = (type: 'entregar' | 'receber', lanceId: string, produto: any) => {
     setModalType(type);
     setLanceId(lanceId);
     setProdutoInfo(produto);  // Armazenar as informações do produto no estado
     setOpenModalProduct(true);  // Abre o modal
   };
+
   const gerarFaturaPosto = async (registroId) => {
     try {
       const apiUrl = `${baseUrl}api/registro-posto/${registroId}/`;
@@ -330,7 +336,7 @@ export function CustomersTable({
                 <TableCell>{lance.id}</TableCell>
                 <TableCell>
                   <img
-                  onClick={() => handleOpenModalProduct('entregar', lance.id, lance.produto)}
+                    onClick={() => handleOpenModalProduct('entregar', lance.id, lance.produto)}
                     src={`${mediaUrl}${lance?.produto?.imagens[0]?.imagem}`}
                     alt="Imagem do Produto"
                     style={{
@@ -340,7 +346,7 @@ export function CustomersTable({
                       borderRadius: '8px',
                       marginTop: '10px'
                     }
-                  }
+                    }
                   />
                 </TableCell>
                 <TableCell>
@@ -435,42 +441,42 @@ export function CustomersTable({
           </TableBody>
         </Table>
         {/* Paginação */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        gap: 2, 
-        p: 2,
-        mt: 2
-      }}>
-        <Button
-          variant="contained"
-          disabled={pagination.pageIndex === 1}
-          onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
-          sx={{
-            opacity: pagination.pageIndex === 1 ? 0.5 : 1,
-            cursor: pagination.pageIndex === 1 ? 'not-allowed' : 'pointer'
-          }}
-        >
-          Anterior
-        </Button>
-        
-        <Typography variant="body1">
-          Página {pagination.pageIndex} de {pagination.totalPages}
-        </Typography>
-        
-        <Button
-          variant="contained"
-          disabled={pagination.pageIndex >= pagination.totalPages}
-          onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
-          sx={{
-            opacity: pagination.pageIndex >= pagination.totalPages ? 0.5 : 1,
-            cursor: pagination.pageIndex >= pagination.totalPages ? 'not-allowed' : 'pointer'
-          }}
-        >
-          Próxima
-        </Button>
-      </Box>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 2,
+          p: 2,
+          mt: 2
+        }}>
+          <Button
+            variant="contained"
+            disabled={pagination.pageIndex === 1}
+            onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+            sx={{
+              opacity: pagination.pageIndex === 1 ? 0.5 : 1,
+              cursor: pagination.pageIndex === 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Anterior
+          </Button>
+
+          <Typography variant="body1">
+            Página {pagination.pageIndex} de {pagination.totalPages}
+          </Typography>
+
+          <Button
+            variant="contained"
+            disabled={pagination.pageIndex >= pagination.totalPages}
+            onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+            sx={{
+              opacity: pagination.pageIndex >= pagination.totalPages ? 0.5 : 1,
+              cursor: pagination.pageIndex >= pagination.totalPages ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Próxima
+          </Button>
+        </Box>
       </Box>
 
       {/* Exibindo erros usando Snackbar */}
@@ -487,7 +493,7 @@ export function CustomersTable({
       )}
 
 
-      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
+      <Dialog open={openModal} onClose={() => !isProcessing && setOpenModal(false)} fullWidth maxWidth="sm">
         <DialogTitle>
           {modalType === 'entregar' && 'Registrar Entrega'}
           {modalType === 'receber' && 'Registrar Recebimento'}
@@ -509,6 +515,7 @@ export function CustomersTable({
                         checked={condicoesSelecionadas.includes(condicao)}
                         onChange={() => toggleCondicao(condicao)}
                         name={condicao}
+                        disabled={isProcessing}
                       />
                     }
                     label={condicao}
@@ -525,6 +532,7 @@ export function CustomersTable({
                 margin="normal"
                 multiline
                 rows={4}
+                disabled={isProcessing}
               />
 
               {/* Imagem */}
@@ -533,22 +541,39 @@ export function CustomersTable({
                 accept="image/*"
                 onChange={(e) => setImagem(e.target.files ? e.target.files[0] : null)}
                 style={{ marginTop: 10 }}
+                disabled={isProcessing}
               />
             </>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenModal(false)} color="secondary">Cancelar</Button>
           <Button
-            onClick={() => {
-              if (modalType === 'entregar') registrarEntrega();
-              if (modalType === 'receber') registrarRecebimento();
-              if (modalType === 'negar') registrarNegacao();
-              if (modalType === 'devolver') registrarDevolucao();
+            onClick={() => setOpenModal(false)}
+            color="secondary"
+            disabled={isProcessing}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={async () => {
+              setIsProcessing(true);
+              try {
+                if (modalType === 'entregar') await registrarEntrega();
+                if (modalType === 'receber') await registrarRecebimento();
+                if (modalType === 'negar') await registrarNegacao();
+                if (modalType === 'devolver') await registrarDevolucao();
+              } finally {
+                setIsProcessing(false);
+              }
             }}
             color="primary"
+            disabled={isProcessing}
           >
-            Confirmar
+            {isProcessing ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Confirmar'
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -562,7 +587,7 @@ export function CustomersTable({
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img
-          src={`${mediaUrl}${produtoInfo?.usuario?.foto || produtoInfo?.empresa?.imagens[0]?.imagem}`}
+              src={`${mediaUrl}${produtoInfo?.usuario?.foto || produtoInfo?.empresa?.imagens[0]?.imagem}`}
               alt="Foto do Vendedor"
               style={{
                 width: 50,
@@ -582,7 +607,7 @@ export function CustomersTable({
           </Box>
         </DialogTitle>
 
-        <Divider/>
+        <Divider />
 
         <DialogContent>
           {produtoInfo && (
